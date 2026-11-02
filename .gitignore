@@ -17,7 +17,6 @@ venv/
 !.env.example
 
 # uv
-uv.lock
 .python-version
 
 # Tests & coverage
