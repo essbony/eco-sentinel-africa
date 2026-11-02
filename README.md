@@ -9,6 +9,8 @@
 [![Docker](https://img.shields.io/badge/docker-ready-2496ED)](https://docs.docker.com)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
 
+> **🌐 Live : [Dashboard Render](https://eco-sentinel-africa-latest.onrender.com/dashboard) — https://eco-sentinel-africa-latest.onrender.com/dashboard | API [/health](https://eco-sentinel-africa-latest.onrender.com/health) | [/docs](https://eco-sentinel-africa-latest.onrender.com/docs)**
+
 ---
 
 ## Table des matières
@@ -220,10 +222,12 @@ Chargement via `eco_sentinel.config.get_settings()` (cache `lru`, `effective_api
 
 ## Lancement
 
+> **Prod Render : https://eco-sentinel-africa-latest.onrender.com/dashboard**
+
 ```bash
 # Dev (reload)
 uv run uvicorn eco_sentinel.api.app:app --reload --port 8000
-# → http://localhost:8000/docs | /health | /dashboard
+# → http://localhost:8000/docs | /health | /dashboard | Prod: https://eco-sentinel-africa-latest.onrender.com/dashboard
 
 # CLI
 uv run eco-sentinel
@@ -241,9 +245,9 @@ docker compose --profile eval run --rm deepeval
 
 | Route | Méthode | Description |
 |---|---|---|
-| `/health` | GET | `{"status":"ok","app","version","env","counts","vision","router"}` |
-| `/` | GET | `{"message":"Eco Sentinel Africa API — voir /docs et /dashboard"}` |
-| `/dashboard` | GET | HTML temps réel (Live RTSP, boxes, alerts log) |
+| `/health` | GET | `{"status":"ok","app","version","env","counts","vision","router"}` — Prod: https://eco-sentinel-africa-latest.onrender.com/health |
+| `/` | GET | `{"message":"Eco Sentinel Africa API — voir /docs et /dashboard"}` — Prod: https://eco-sentinel-africa-latest.onrender.com/ |
+| `/dashboard` | GET | HTML temps réel (Live RTSP, boxes, alerts log) — Prod: https://eco-sentinel-africa-latest.onrender.com/dashboard |
 | `/events` | GET | Liste événements (`?limit=50`) |
 | `/events/{id}` | GET | Détail événement |
 | `/alerts` | GET | Liste alertes |
@@ -257,7 +261,9 @@ docker compose --profile eval run --rm deepeval
 
 ## Dashboard
 
-`GET /dashboard` — 4 stat cards, `LIVE RTSP STREAM — CAM 1`, `AGENTS — LIVE` (6 agents), `ALERTS LOG`, `SYSTEM STATUS`.
+> **Prod : [https://eco-sentinel-africa-latest.onrender.com/dashboard](https://eco-sentinel-africa-latest.onrender.com/dashboard)**
+
+`GET /dashboard` — 4 stat cards, `LIVE RTSP STREAM — CAM 1`, `AGENTS — LIVE` (6 agents), `ALERTS LOG`, `SYSTEM STATUS`. Local: `http://localhost:8000/dashboard`.
 
 - **Preview** : `fileInput` image/vidéo (extraction 1 fps, max 4 frames) ou `Caméra réelle` (getUserMedia, `1.5 s`)
 - **Boxes** : `bboxLayer` DOM + `maskSvg` polygone `fill 0.22`, couleurs `waste vert, plastic bleu, container jaune...`, `drawBoxes()` mappe `0-1 → %` ou `px`, NMS `0.45`
@@ -300,6 +306,8 @@ jobs:
 Éval : `deepeval test run evals/` (golden `evals/datasets/golden.jsonl`, `OPENAI_API_KEY`/`MODEL_API_KEY`).
 
 ## Déploiement Railway / Render
+
+> **Déployé sur Render → [https://eco-sentinel-africa-latest.onrender.com/dashboard](https://eco-sentinel-africa-latest.onrender.com/dashboard)**
 
 **Sans rien modifier** — image Docker prête (`EXPOSE 8000`, `HEALTHCHECK /health`) :
 
