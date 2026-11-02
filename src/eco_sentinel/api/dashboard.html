@@ -1,0 +1,956 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1"/>
+<title>Eco Sentinel Africa — Dashboard</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@500&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#0B1628;
+  --sidebar:#0E1E33;
+  --sidebar-active:#1E3A8A;
+  --topbar:#0F2238;
+  --card:#13233E;
+  --card-2:#162840;
+  --card-border:#1C3352;
+  --card-border-2:#253A5E;
+  --text:#E6EDF7;
+  --muted:#8AA0BF;
+  --faint:#5B7394;
+  --green:#1DBA54;
+  --green-bg:#0F2B1A;
+  --green-border:#1A5A2E;
+  --red:#EF4444;
+  --orange:#F59E0B;
+  --blue:#2AB4D9;
+  --yellow:#EAB308;
+  --radius:12px;
+  --radius-lg:14px;
+}
+*{box-sizing:border-box}
+html,body{margin:0;height:100%}
+body{font-family:"Inter",system-ui,-apple-system,Segoe UI,Roboto,Helvetica,Arial,sans-serif;background:var(--bg);color:var(--text);line-height:1.5;overflow-x:hidden}
+a{color:inherit;text-decoration:none}
+button{font-family:inherit}
+
+/* LAYOUT */
+.app{display:flex;min-height:100vh}
+.sidebar{width:228px;background:var(--sidebar);border-right:1px solid #162A4A;display:flex;flex-direction:column;flex-shrink:0;position:sticky;top:0;height:100vh;overflow:auto}
+.main{flex:1;min-width:0;background:var(--bg);display:flex;flex-direction:column}
+.content{padding:16px 18px 24px;max-width:1440px;width:100%;margin:0 auto}
+
+/* SIDEBAR */
+.brand{padding:18px 16px 14px;display:flex;align-items:center;gap:10px;border-bottom:1px solid #162A4A}
+.brand-logo{width:40px;height:40px;background:#0DBA5A;border-radius:10px;display:grid;place-items:center;flex-shrink:0}
+.brand-logo svg{width:26px;height:26px}
+.brand-text b{display:block;font-size:13px;font-weight:800;letter-spacing:-.02em;line-height:1}
+.brand-text span{font-size:11px;color:var(--muted);font-weight:500}
+.nav{padding:10px 10px 8px;display:flex;flex-direction:column;gap:4px}
+.nav-item{display:flex;align-items:center;gap:10px;padding:9px 10px;border-radius:8px;font-size:13px;font-weight:500;color:#9DB1D0;cursor:pointer;border:1px solid transparent;transition:.15s}
+.nav-item svg{width:16px;height:16px;opacity:.9;flex-shrink:0}
+.nav-item.active{background:#2563EB;color:#fff;border-color:#3B82F6;box-shadow:0 1px 0 rgba(255,255,255,.06) inset}
+.nav-item:hover{color:var(--text);background:rgba(255,255,255,.04)}
+.nav-section{margin:6px 0 0;padding:0 10px}
+.nav-section label{font-size:10px;letter-spacing:.08em;text-transform:uppercase;color:#4A6388;font-weight:700}
+.sidebar-foot{margin-top:auto;padding:12px 10px;border-top:1px solid #162A4A;display:flex;flex-direction:column;gap:4px}
+
+/* TOPBAR */
+.topbar{height:52px;background:var(--topbar);border-bottom:1px solid #1A3355;display:flex;align-items:center;justify-content:space-between;padding:0 18px;gap:12px;position:sticky;top:0;z-index:10}
+.topbar-left{display:flex;align-items:center;gap:12px;min-width:0}
+.hamburger{width:32px;height:32px;border-radius:8px;border:1px solid #1E3358;background:#13233E;display:grid;place-items:center;cursor:pointer;color:#8AA0BF}
+.topbar-title{font-size:13px;font-weight:800;letter-spacing:.06em;text-transform:uppercase;color:var(--text);white-space:nowrap}
+.topbar-badges{display:flex;align-items:center;gap:8px;flex-wrap:wrap;justify-content:flex-end}
+.badge{display:inline-flex;align-items:center;gap:6px;padding:5px 10px;border-radius:999px;font-size:11px;font-weight:650;border:1px solid var(--card-border);background:var(--card);white-space:nowrap}
+.badge.online{border-color:#1A5A2E;background:var(--green-bg);color:#86EFAC}
+.badge.time{color:var(--muted);font-weight:500}
+.badge.time svg{width:12px;height:12px;opacity:.7}
+.dot{width:7px;height:7px;border-radius:50%;background:var(--green);box-shadow:0 0 0 4px rgba(29,186,84,.22);display:inline-block}
+.btn-refresh{appearance:none;border:1px solid #1E3358;background:transparent;color:#8AA0BF;padding:6px 10px;border-radius:8px;font-size:11px;font-weight:650;cursor:pointer}
+.btn-refresh:hover{color:var(--text);border-color:#2A4A7A}
+
+/* STATS */
+.stats{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin:16px 0 14px}
+@media(max-width:1100px){.stats{grid-template-columns:repeat(2,1fr)}}
+@media(max-width:560px){.stats{grid-template-columns:1fr}}
+.stat-card{background:var(--card);border:1px solid var(--card-border);border-radius:var(--radius);padding:14px 16px;position:relative}
+.stat-card label{display:block;font-size:10px;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);font-weight:700;margin-bottom:6px}
+.stat-card strong{display:block;font-size:26px;font-weight:800;letter-spacing:-.03em;line-height:1}
+.stat-card .sub{font-size:11px;color:var(--faint);margin-top:2px}
+.stat-dot{position:absolute;top:14px;right:14px;width:10px;height:10px;border-radius:50%;background:var(--red);box-shadow:0 0 0 4px rgba(239,68,68,.18)}
+.stat-dot.green{background:var(--green);box-shadow:0 0 0 4px rgba(29,186,84,.18)}
+
+/* MIDDLE */
+.middle{display:grid;grid-template-columns:1.35fr 0.85fr;gap:14px;margin-bottom:14px}
+.middle-right{display:flex;flex-direction:column;gap:14px;min-width:0}
+.agents-live{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.agents-live .agent{padding:8px 9px}
+.agents-live .agent h4{font-size:11px}
+.agents-live .agent .role{font-size:10px}
+@media(max-width:1100px){.middle{grid-template-columns:1fr}.middle-right{order:2}}
+@media(max-width:640px){.agents-live{grid-template-columns:1fr}}
+.live-card{background:var(--card);border:1px solid var(--card-border);border-radius:var(--radius-lg);overflow:hidden;display:flex;flex-direction:column}
+.live-head{display:flex;align-items:center;justify-content:space-between;padding:12px 14px;border-bottom:1px solid var(--card-border);gap:10px}
+.live-head h2{margin:0;font-size:12px;letter-spacing:.06em;text-transform:uppercase;font-weight:800;color:var(--text);display:flex;align-items:center;gap:8px}
+.live-head h2 span{color:var(--muted);font-weight:600}
+.live-online{display:flex;align-items:center;gap:6px;font-size:11px;font-weight:650;color:#86EFAC}
+.live-online i{width:7px;height:7px;border-radius:50%;background:var(--green);box-shadow:0 0 0 4px rgba(29,186,84,.18);display:inline-block}
+.live-body{position:relative;background:#040A18;flex:1;min-height:340px;display:flex;align-items:center;justify-content:center;overflow:hidden}
+.live-body img, .live-body video{width:100%;height:100%;object-fit:cover;display:block;max-height:420px}
+#previewPlaceholder{position:absolute;inset:0;display:grid;place-items:center;color:var(--muted);font-size:13px;background:linear-gradient(180deg,#0A1A2E 0%, #070F22 100%)}
+#previewPlaceholder small{color:var(--faint);font-size:11px;display:block;margin-top:4px;text-align:center}
+.live-badge{position:absolute;top:10px;left:10px;background:var(--red);color:#fff;font-size:10px;font-weight:800;letter-spacing:.06em;padding:4px 8px;border-radius:6px;display:flex;align-items:center;gap:6px;z-index:2}
+.live-badge i{width:7px;height:7px;border-radius:50%;background:#fff;display:inline-block;animation:pulse 1.2s infinite}
+.live-time{position:absolute;top:10px;left:50%;transform:translateX(-50%);background:#F59E0B;color:#0B1628;font-size:11px;font-weight:800;padding:3px 8px;border-radius:6px;z-index:2;font-family:"JetBrains Mono",monospace}
+.intrusion-label{position:absolute;top:72px;right:28%;background:var(--red);color:#fff;font-size:9px;font-weight:800;letter-spacing:.06em;padding:3px 6px;border-radius:4px;z-index:2}
+@media(max-width:600px){.intrusion-label{right:10%}}
+.live-controls{display:flex;align-items:center;gap:8px;padding:10px 12px;background:#0D1B31;border-top:1px solid var(--card-border);flex-wrap:wrap}
+.live-controls input[type=file]{font-size:12px;color:var(--muted);max-width:180px}
+.btn{appearance:none;border:1px solid #1A4D2A;background:var(--green);color:#05210F;padding:7px 12px;border-radius:8px;font-weight:750;font-size:12px;cursor:pointer}
+.btn:hover{filter:brightness(1.05)}
+.btn.ghost{background:transparent;color:var(--text);border-color:var(--card-border)}
+.btn.ghost:hover{background:rgba(255,255,255,.04)}
+.btn:disabled{opacity:.5;cursor:not-allowed}
+.bbox{position:absolute;border:2px solid var(--green);background:rgba(29,186,84,.08);pointer-events:none;z-index:1;border-radius:4px}
+.bbox.waste{border-color:#1DBA54;background:rgba(29,186,84,.10)}
+.bbox.plastic_bottle{border-color:#2AB4D9;background:rgba(42,180,217,.10)}
+.bbox.container{border-color:#EAB308;background:rgba(234,179,8,.12)}
+.bbox.debris{border-color:#F97316;background:rgba(249,115,22,.12)}
+.bbox.dumping{border-color:#EF4444;background:rgba(239,68,68,.12)}
+.bbox.person{border-color:#1DBA54}
+.bbox.vehicle{border-color:#EAB308;background:rgba(234,179,8,.08)}
+.bbox-label{position:absolute;top:-18px;left:-2px;font-size:10px;font-weight:700;padding:2px 6px;border-radius:4px;white-space:nowrap;font-family:"JetBrains Mono",monospace}
+.bbox.waste .bbox-label{background:#1DBA54;color:#05210F}
+.bbox.plastic_bottle .bbox-label{background:#2AB4D9;color:#05210F}
+.bbox.container .bbox-label{background:#EAB308;color:#0B1628}
+.bbox.debris .bbox-label{background:#F97316;color:#fff}
+.bbox.dumping .bbox-label{background:#EF4444;color:#fff}
+.bbox.person .bbox-label{background:#1DBA54;color:#05210F}
+.bbox.vehicle .bbox-label{background:#EAB308;color:#0B1628}
+.bbox-intrusion{position:absolute;border:2px solid var(--red);background:rgba(239,68,68,.06);pointer-events:none;z-index:1}
+.warn-triangle{position:absolute;left:54%;top:42%;width:28px;height:28px;background:var(--red);color:#fff;display:grid;place-items:center;border-radius:4px;z-index:2;font-weight:800;font-size:14px;transform:translate(-50%,-50%)}
+
+/* ALERTS LOG */
+.alerts-card{background:var(--card);border:1px solid var(--card-border);border-radius:var(--radius-lg);overflow:hidden;display:flex;flex-direction:column;max-height:520px}
+.alerts-head{padding:12px 14px;border-bottom:1px solid var(--card-border)}
+.alerts-head h2{margin:0;font-size:11px;letter-spacing:.07em;text-transform:uppercase;font-weight:800;color:var(--text)}
+.alerts-head p{margin:2px 0 0;font-size:11px;color:var(--faint)}
+.alerts-list{overflow:auto;padding:8px;display:flex;flex-direction:column;gap:8px;flex:1}
+.alert-item{background:#0D1F38;border:1px solid #1E3358;border-radius:10px;padding:10px 11px;display:flex;flex-direction:column;gap:4px}
+.alert-item.high{border-left:3px solid var(--red)}
+.alert-item.medium{border-left:3px solid var(--orange)}
+.alert-item.low{border-left:3px solid #3B82F6}
+.alert-item.critical{border-left:3px solid var(--red)}
+.alert-top{display:flex;align-items:center;justify-content:space-between;gap:8px}
+.alert-title{font-size:12px;font-weight:700;color:var(--text)}
+.alert-sev{font-size:9px;font-weight:800;letter-spacing:.06em;text-transform:uppercase;padding:2px 6px;border-radius:999px}
+.alert-sev.high{background:rgba(239,68,68,.15);color:#FCA5A5;border:1px solid rgba(239,68,68,.3)}
+.alert-sev.medium{background:rgba(245,158,11,.15);color:#FDE68A;border:1px solid rgba(245,158,11,.3)}
+.alert-sev.low{background:rgba(59,130,246,.15);color:#93C5FD;border:1px solid rgba(59,130,246,.3)}
+.alert-meta{font-size:11px;color:var(--muted)}
+.alert-meta b{color:var(--faint);font-weight:600}
+.alert-time{font-size:10px;color:var(--faint);font-family:"JetBrains Mono",monospace}
+
+/* SYSTEM STATUS */
+.system-card{background:var(--card);border:1px solid var(--card-border);border-radius:var(--radius-lg);padding:14px 16px}
+.system-card h2{margin:0 0 12px;font-size:11px;letter-spacing:.08em;text-transform:uppercase;font-weight:800;color:var(--text)}
+.gauges{display:grid;grid-template-columns:repeat(4,1fr);gap:16px}
+@media(max-width:800px){.gauges{grid-template-columns:repeat(2,1fr)}}
+@media(max-width:460px){.gauges{grid-template-columns:1fr 1fr}}
+.gauge{display:flex;flex-direction:column;align-items:center;gap:8px;padding:8px}
+.gauge-ring{position:relative;width:96px;height:96px}
+.gauge-ring svg{transform:rotate(-90deg);width:96px;height:96px}
+.gauge-ring .bg{fill:none;stroke:#1E3358;stroke-width:8}
+.gauge-ring .fg{fill:none;stroke-width:8;stroke-linecap:round;transition:stroke-dashoffset .6s ease}
+.gauge-center{position:absolute;inset:0;display:grid;place-items:center;text-align:center}
+.gauge-center strong{font-size:15px;font-weight:800;letter-spacing:-.02em;line-height:1}
+.gauge-center span{font-size:10px;color:var(--faint);font-family:"JetBrains Mono",monospace}
+.gauge label{font-size:11px;font-weight:650;color:var(--muted);text-align:center}
+.gauge sub{font-size:10px;color:var(--faint);font-family:"JetBrains Mono",monospace}
+
+/* EXTRA SECTIONS (pipeline / agents) */
+.extra{margin-top:14px;display:grid;gap:14px}
+.card{background:var(--card);border:1px solid var(--card-border);border-radius:var(--radius-lg);padding:14px 16px}
+.card h3{margin:0 0 8px;font-size:12px;letter-spacing:.06em;text-transform:uppercase;font-weight:800;color:var(--muted)}
+.card p{margin:0;color:var(--muted);font-size:12px}
+.pipeline{display:flex;gap:8px;align-items:center;flex-wrap:wrap;margin:10px 0}
+.step{flex:1;min-width:140px;background:#0D1F38;border:1px solid #1E3358;border-radius:10px;padding:10px 11px}
+.step.active{border-color:var(--green);box-shadow:0 0 0 2px rgba(29,186,84,.15)}
+.step em{font-style:normal;font-size:11px;font-weight:800;letter-spacing:.06em;text-transform:uppercase;color:var(--green)}
+.step p{margin:4px 0 0;font-size:11px;color:var(--muted);line-height:1.35}
+.arrow{color:var(--faint);font-weight:700}
+.agents-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-top:10px}
+@media(max-width:900px){.agents-grid{grid-template-columns:repeat(2,1fr)}}
+@media(max-width:560px){.agents-grid{grid-template-columns:1fr}}
+.agent{background:#0D1F38;border:1px solid #1E3358;border-radius:12px;padding:11px}
+.agent h4{margin:0;font-size:12px;font-weight:800}
+.agent .role{font-size:11px;color:var(--muted);margin:2px 0 6px}
+.agent .kv{display:flex;justify-content:space-between;font-size:11px;color:var(--muted);border-top:1px solid #1A2E55;padding-top:6px;margin-top:6px}
+.tag{font-size:10px;font-weight:800;letter-spacing:.06em;text-transform:uppercase;padding:3px 7px;border-radius:999px;border:1px solid var(--card-border);background:#0F1A32;color:var(--muted)}
+.tag.meta{color:#86EFAC;border-color:#1A5A2E;background:#0F2B1A}
+.tag.mock{color:#FDE68A;border-color:#5A4510;background:#2B2210}
+.json{font-family:"JetBrains Mono",monospace;font-size:11px;background:#060D1E;border:1px solid var(--card-border);border-radius:10px;padding:10px;max-height:240px;overflow:auto;white-space:pre-wrap;word-break:break-word}
+.log{font-family:"JetBrains Mono",monospace;font-size:11px;background:#060D1E;border:1px solid var(--card-border);border-radius:10px;padding:10px;max-height:150px;overflow:auto;white-space:pre-wrap}
+.events-mini{max-height:260px;overflow:auto;display:grid;gap:6px}
+.ev{background:#0A1326;border:1px solid var(--card-border);border-left:3px solid var(--blue);border-radius:10px;padding:9px 10px}
+.ev.critical{border-left-color:var(--red)} .ev.warning{border-left-color:var(--yellow)} .ev.info{border-left-color:var(--blue)}
+
+@keyframes pulse{0%,100%{opacity:1}50%{opacity:.5}}
+@keyframes alertBlink{0%,100%{background:#0D1F38;border-color:#1E3358}50%{background:rgba(239,68,68,.28);border-color:var(--red);box-shadow:0 0 0 3px rgba(239,68,68,.25)}}
+@keyframes dangerPulse{0%{box-shadow:0 0 0 0 rgba(239,68,68,.5)}50%{box-shadow:0 0 0 10px rgba(239,68,68,0)}100%{box-shadow:0 0 0 0 rgba(239,68,68,0)}}
+@keyframes bboxBlink{0%,100%{opacity:1}50%{opacity:.45}}
+.alert-item.blink{animation:alertBlink 0.6s ease 4}
+.live-card.danger{animation:dangerPulse 1s ease 3; border-color:var(--red) !important}
+.bbox.critical{animation:bboxBlink 0.5s ease 4}
+.agent.working{border-color:var(--green) !important; box-shadow:0 0 0 2px rgba(29,186,84,.25); transition:all .3s}
+/* mobile sidebar */
+@media(max-width:860px){
+  .sidebar{position:fixed;left:0;top:0;z-index:30;transform:translateX(-100%);transition:transform .22s ease}
+  .sidebar.open{transform:translateX(0)}
+  .backdrop{position:fixed;inset:0;background:rgba(0,0,0,.45);z-index:29;display:none}
+  .backdrop.show{display:block}
+}
+</style>
+</head>
+<body>
+<div class="app">
+  <aside class="sidebar" id="sidebar">
+    <div class="brand">
+      <div class="brand-logo" aria-hidden="true">
+        <svg viewBox="0 0 32 32" fill="none"><path d="M16 3 L6 9 L10 9 L10 27 L14 27 L14 13 L18 13 L18 27 L22 27 L22 9 L26 9 Z" fill="white" opacity=".95"/><circle cx="16" cy="8" r="2" fill="white"/></svg>
+      </div>
+      <div class="brand-text">
+        <b>Eco Sentinel</b>
+        <span>Africa · v1.0</span>
+      </div>
+    </div>
+    <nav class="nav">
+      <a class="nav-item active" href="#"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></svg> Dashboard</a>
+      <a class="nav-item" href="#demo"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M23 7l-7 5 7 5V7z"/><rect x="1" y="5" width="15" height="14" rx="2"/></svg> Caméras</a>
+      <a class="nav-item" href="#detections"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg> Détections</a>
+      <a class="nav-item" href="#alerts"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg> Alertes</a>
+      <a class="nav-item" href="#live"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="12" cy="12" r="10"/><polygon points="10 8 16 12 10 16 10 8"/></svg> Flux temps réel</a>
+      <a class="nav-item" href="#"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 00.33 1.82l.06.06a2 2 0 01-2.83 2.83l-.06-.06a1.65 1.65 0 00-1.82-.33 1.65 1.65 0 00-1 1.51V21a2 2 0 01-4 0v-.09a1.65 1.65 0 00-1-1.51 1.65 1.65 0 00-1.82.33l-.06.06a2 2 0 01-2.83-2.83l.06-.06A1.65 1.65 0 009 15a1.65 1.65 0 00-1-1.51V13a2 2 0 014 0v.49c.38.23.86.35 1.5.35s1.12-.12 1.5-.35V13a2 2 0 014 0v.49a1.65 1.65 0 00-1 1.51z"/></svg> Paramètres</a>
+    </nav>
+    <div class="nav-section"><label>Gestion</label></div>
+    <div class="nav" style="padding-top:4px">
+      <a class="nav-item" href="#"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 00-3-3.87"/><path d="M16 3.13a4 4 0 010 7.75"/></svg> Utilisateurs</a>
+      <a class="nav-item" href="/docs" target="_blank"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M9 21H5a2 2 0 01-2-2V5a2 2 0 012-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg> API /docs</a>
+      <a class="nav-item" href="#"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M9 21H5a2 2 0 01-2-2V5a2 2 0 012-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg> Déconnexion</a>
+    </div>
+    <div class="sidebar-foot">
+      <div style="font-size:11px;color:var(--faint);padding:4px 6px">© Eco Sentinel Africa<br>Abidjan · Pipeline autonome</div>
+    </div>
+  </aside>
+  <div class="backdrop" id="backdrop"></div>
+
+  <div class="main">
+    <header class="topbar">
+      <div class="topbar-left">
+        <button class="hamburger" id="hamburger" aria-label="Menu">☰</button>
+        <div class="topbar-title">ECO SENTINEL AFRICA — DASHBOARD</div>
+        <span class="badge online"><span class="dot"></span> Système en ligne</span>
+      </div>
+      <div class="topbar-badges">
+        <span class="badge time" id="topTime"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg> <span id="timeText">—</span></span>
+        <button class="btn-refresh" id="soundToggle" title="Son d'alerte">🔊 Son ON</button>
+        <button class="btn-refresh" id="btnRefresh">↻ Actualiser</button>
+      </div>
+    </header>
+
+    <div class="content">
+      <!-- STATS -->
+      <section class="stats">
+        <div class="stat-card">
+          <label>Total capteurs</label>
+          <strong id="kTotalCams">—</strong>
+          <div class="sub" id="kTotalCamsSub">sources connectées</div>
+        </div>
+        <div class="stat-card">
+          <label>Capteurs actifs</label>
+          <strong id="kActiveCams">—</strong>
+          <div class="sub" id="kActiveCamsSub">en ligne</div>
+        </div>
+        <div class="stat-card">
+          <label>Alertes aujourd'hui</label>
+          <div class="stat-dot" id="alertDot"></div>
+          <strong id="kAlertsToday">0</strong>
+          <div class="sub">déclenchées</div>
+        </div>
+        <div class="stat-card">
+          <label>Total détections</label>
+          <strong id="kTotalDet">0</strong>
+          <div class="sub" id="kTotalDetSub">événements</div>
+        </div>
+      </section>
+
+      <!-- MIDDLE: LIVE + AGENTS À CÔTÉ DU FLUX -->
+      <section class="middle" id="live">
+        <div class="live-card">
+          <div class="live-head">
+            <h2>LIVE RTSP STREAM — <span id="liveCamLabel">CAM 1 · Abidjan</span></h2>
+            <span class="live-online"><i></i> En ligne</span>
+          </div>
+          <div class="live-body" id="liveBody">
+            <div id="previewPlaceholder">
+              <div style="text-align:center">
+                <div style="font-weight:700;color:var(--text)">Flux en attente</div>
+                <small>Dépose une image ou vidéo ci-dessous pour voir la détection</small>
+              </div>
+            </div>
+            <img id="previewImg" style="display:none" alt="preview"/>
+            <video id="previewVideo" style="display:none" controls muted playsinline></video>
+            <!-- overlay layers -->
+            <div class="live-badge"><i></i> LIVE</div>
+            <div class="live-time" id="liveClock">10:45:22</div>
+            <div class="intrusion-label" id="intrusionLabel">ZONE D'ALERTE</div>
+            <div id="bboxLayer" style="position:absolute;inset:0;pointer-events:none"></div>
+            <svg id="maskSvg" style="position:absolute;inset:0;width:100%;height:100%;pointer-events:none;z-index:1"></svg>
+            <canvas id="overlay" style="position:absolute;inset:0;pointer-events:none"></canvas>
+          </div>
+          <div class="live-controls" id="demo" style="flex-direction:column;align-items:stretch;gap:8px">
+            <!-- CAM RÉELLE — prioritaire pour jury -->
+            <div style="display:flex;gap:8px;flex-wrap:wrap;align-items:center;background:#0A1F33;border:1px solid #1E3358;border-radius:10px;padding:8px 10px">
+              <span style="font-size:11px;font-weight:800;letter-spacing:.06em;color:var(--green)">● CAMÉRA RÉELLE</span>
+              <select id="camSelect" style="flex:1;min-width:140px;background:#0F2238;border:1px solid #1E3358;color:var(--text);border-radius:8px;padding:6px 8px;font-size:12px">
+                <option value="">Détection caméras…</option>
+              </select>
+              <button class="btn" id="btnCamOn" style="background:#2563EB;border-color:#3B82F6;color:#fff">🎥 Activer caméra</button>
+              <button class="btn" id="btnCamStart" disabled style="background:#0DBA5A">⏺ Démarrer surveillance</button>
+              <button class="btn ghost" id="btnCamStop" disabled>⏹ Arrêter</button>
+              <span id="camStatus" class="alert-meta" style="margin-left:4px">Caméra inactive</span>
+            </div>
+            <div style="display:flex;gap:8px;flex-wrap:wrap;align-items:center">
+              <input type="text" id="rtspInput" placeholder="RTSP/IP externe (optionnel) ex: rtsp://192.168.1.10/stream" style="flex:1;min-width:180px;background:#0F2238;border:1px solid #1E3358;color:var(--text);border-radius:8px;padding:6px 8px;font-size:11px"/>
+              <span class="alert-meta" style="font-size:10px">Laisse vide pour utiliser la webcam du laptop (recommandé jury)</span>
+            </div>
+            <div style="display:flex;gap:8px;flex-wrap:wrap;align-items:center">
+              <span style="font-size:11px;color:var(--faint)">Ou fichier (secours) :</span>
+              <input type="file" id="fileInput" accept="image/*,video/*"/>
+              <button class="btn ghost" id="btnUpload" style="padding:6px 10px;font-size:11px">Envoyer fichier</button>
+              <button class="btn ghost" id="btnClear" style="padding:6px 10px">Effacer</button>
+              <span class="alert-meta" id="uploadResult" style="margin-left:6px"></span>
+              <span class="alert-meta" id="previewMeta" style="margin-left:auto"></span>
+            </div>
+            <div class="alert-meta" style="font-size:10px;color:var(--faint);display:flex;gap:12px;flex-wrap:wrap">
+              <span id="fpsInfo">1 image/s → Vision SAM 3.1 · pas de simulation</span>
+              <span id="captureCount" style="margin-left:auto"></span>
+            </div>
+          </div>
+          <div style="padding:8px 12px;border-top:1px solid var(--card-border);display:flex;gap:8px;flex-wrap:wrap;align-items:center">
+            <button class="btn ghost" style="padding:5px 8px;font-size:11px" data-tab="boxes">Boîtes</button>
+            <button class="btn ghost" style="padding:5px 8px;font-size:11px" data-tab="json">JSON</button>
+            <button class="btn ghost" style="padding:5px 8px;font-size:11px" data-tab="explain">Aide</button>
+            <span class="alert-meta" id="boxesInfo"></span>
+          </div>
+          <div id="tabBoxes" style="padding:0 12px 10px">
+            <div id="boxesList" class="alert-meta">En attente d'une image…</div>
+          </div>
+          <div id="tabJson" style="display:none;padding:0 12px 10px"><pre id="jsonOut" class="json">{}</pre></div>
+          <div id="tabExplain" style="display:none;padding:0 12px 10px" class="alert-meta">
+            <p style="margin:0">SAM 3.1 détecte <code>waste, plastic_bottle, container, debris, dumping</code> avec <code>score</code> et <code>bbox</code>. Classification distingue faits / hypothèses. <code>simulated:true</code> si mock.</p>
+          </div>
+        </div>
+
+        <div class="middle-right">
+          <!-- TRAVAIL DES AGENTS JUSTE À CÔTÉ DU FLUX -->
+          <div class="alerts-card" id="agentsLive" style="max-height:none">
+            <div class="alerts-head" style="display:flex;justify-content:space-between;align-items:center">
+              <div><h2>AGENTS — LIVE</h2><p>Travail en temps réel</p></div>
+              <span id="agentsLiveStatus" class="alert-meta" style="font-size:10px">En attente…</span>
+            </div>
+            <div style="padding:8px" class="agents-live">
+              <div class="agent" id="al-vision"><h4>👁 Vision</h4><div class="role">SAM 3.1</div><div class="alert-meta" id="al-v-detail" style="font-size:10px">—</div><div class="kv" style="font-size:10px"><span>Modèle</span><b id="al-v-model">sam-3.1</b></div></div>
+              <div class="agent" id="al-router"><h4>🧭 Router</h4><div class="role">Wonder</div><div class="alert-meta" id="al-r-detail" style="font-size:10px">—</div><div class="kv" style="font-size:10px"><span>Plan</span><b id="al-r-plan">—</b></div></div>
+              <div class="agent" id="al-class"><h4>🏷 Class</h4><div class="role">Faits/hypothèses</div><div class="alert-meta" id="al-c-detail" style="font-size:10px">—</div><div class="kv" style="font-size:10px"><span>Lat.</span><b id="al-c-lat">—</b></div></div>
+              <div class="agent" id="al-geo"><h4>📍 Geo</h4><div class="role">Contexte</div><div class="alert-meta" id="al-g-detail" style="font-size:10px">—</div><div class="kv" style="font-size:10px"><span>Zone</span><b id="al-g-zone">—</b></div></div>
+              <div class="agent" id="al-res"><h4>📚 Research</h4><div class="role">Vérifié</div><div class="alert-meta" id="al-res-detail" style="font-size:10px">—</div><div class="kv" style="font-size:10px"><span>Refs</span><b id="al-res-refs">—</b></div></div>
+              <div class="agent" id="al-an"><h4>🧪 Analysis</h4><div class="role">Risque</div><div class="alert-meta" id="al-an-detail" style="font-size:10px">—</div><div class="kv" style="font-size:10px"><span>Risque</span><b id="al-an-risk">—</b></div></div>
+            </div>
+          </div>
+
+          <div class="alerts-card" id="alerts">
+            <div class="alerts-head">
+              <h2>ALERTS LOG</h2>
+              <p>Activités récentes</p>
+            </div>
+            <div class="alerts-list" id="alertsList">
+              <div class="alert-meta" style="padding:12px">Chargement…</div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- SYSTEM STATUS -->
+      <section class="system-card">
+        <h2>SYSTEM STATUS</h2>
+        <div class="gauges">
+          <div class="gauge">
+            <div class="gauge-ring">
+              <svg viewBox="0 0 96 96"><circle class="bg" cx="48" cy="48" r="40"/><circle class="fg" id="gCpuFg" cx="48" cy="48" r="40" stroke="#F59E0B" stroke-dasharray="251.3" stroke-dashoffset="251.3"/></svg>
+              <div class="gauge-center"><div><strong id="gCpuVal">45%</strong><span id="gCpuSub">load 2.3</span></div></div>
+            </div>
+            <label>CPU Usage</label>
+          </div>
+          <div class="gauge">
+            <div class="gauge-ring">
+              <svg viewBox="0 0 96 96"><circle class="bg" cx="48" cy="48" r="40"/><circle class="fg" id="gMemFg" cx="48" cy="48" r="40" stroke="#2AB4D9" stroke-dasharray="251.3" stroke-dashoffset="251.3"/></svg>
+              <div class="gauge-center"><div><strong id="gMemVal">6.2 GB</strong><span>16 GB</span></div></div>
+            </div>
+            <label>Memory Usage</label>
+          </div>
+          <div class="gauge">
+            <div class="gauge-ring">
+              <svg viewBox="0 0 96 96"><circle class="bg" cx="48" cy="48" r="40"/><circle class="fg" id="gStoFg" cx="48" cy="48" r="40" stroke="#F97316" stroke-dasharray="251.3" stroke-dashoffset="251.3"/></svg>
+              <div class="gauge-center"><div><strong id="gStoVal">78%</strong><span>2.1 TB / 3 TB</span></div></div>
+            </div>
+            <label>Storage</label>
+          </div>
+          <div class="gauge">
+            <div class="gauge-ring">
+              <svg viewBox="0 0 96 96"><circle class="bg" cx="48" cy="48" r="40"/><circle class="fg" id="gNetFg" cx="48" cy="48" r="40" stroke="#22C55E" stroke-dasharray="251.3" stroke-dashoffset="251.3"/></svg>
+              <div class="gauge-center"><div><strong id="gNetVal">250 Mbps</strong><span>Stable</span></div></div>
+            </div>
+            <label>Network</label>
+          </div>
+        </div>
+      </section>
+
+      <!-- EXTRA: pipeline + agents (adapted) -->
+      <div class="extra">
+        <div class="card">
+          <h3>Pipeline autonome — 7 étapes</h3>
+          <div class="pipeline" id="pipeline">
+            <div class="step active" data-step="1"><em>1 · Ingestion</em><p>WebSocket + queue bornée + sampling. Drop si pleine.</p></div><span class="arrow">→</span>
+            <div class="step" data-step="2"><em>2 · Vision SAM 3.1</em><p>Segmentation/détection Responses API. Fallback mock.</p></div><span class="arrow">→</span>
+            <div class="step" data-step="3"><em>3 · Detector</em><p>Dedup 60s + persistance 2 frames + seuil.</p></div><span class="arrow">→</span>
+            <div class="step" data-step="4"><em>4 · Router Wonder</em><p>Choix workflow standard/fast/deep, orchestre A2A.</p></div><span class="arrow">→</span>
+            <div class="step" data-step="5"><em>5 · Agents Spark</em><p>Classification ∥ Geo → Research → Analysis.</p></div><span class="arrow">→</span>
+            <div class="step" data-step="6"><em>6 · Alerte</em><p>Grille risque + dedup. simulated si mock.</p></div><span class="arrow">→</span>
+            <div class="step" data-step="7"><em>7 · Dashboard</em><p>Broadcast WS + store. Observateur seul.</p></div>
+          </div>
+          <div class="alert-meta" id="healthBox">Chargement santé…</div>
+          <div id="modelBox" class="alert-meta" style="margin-top:4px"></div>
+        </div>
+
+        <div class="card" id="detections" style="display:none">
+          <h3>Travail des agents — 6 rôles</h3>
+          <p>Chaque événement passe par le bus A2A (<code>eco_sentinel.a2a.protocol</code>), corrélé par <code>correlation_id</code>.</p>
+          <div class="agents-grid">
+            <div class="agent"><h4>👁 Vision SAM 3.1</h4><div class="role">Détection / segmentation</div><div class="alert-meta" id="ag-vision-detail">En attente…</div><div class="kv"><span>Modèle</span><b id="ag-vision-model">sam-3.1</b></div><div class="kv"><span>Fournisseur</span><span class="tag mock" id="ag-vision-prov">mock</span></div></div>
+            <div class="agent"><h4>🧭 Router Wonder</h4><div class="role">Orchestration</div><div class="alert-meta" id="ag-router-detail">En attente…</div><div class="kv"><span>Workflow</span><b id="ag-router-plan">—</b></div><div class="kv"><span>Modèle</span><b>muse-wonder-1.0</b></div></div>
+            <div class="agent"><h4>🏷 Classification</h4><div class="role">Faits vs hypothèses</div><div class="alert-meta" id="ag-class-detail">—</div><div class="kv"><span>Latence</span><b id="ag-class-lat">—</b></div><div class="kv"><span>Tag</span><span class="tag mock" id="ag-class-prov">mock</span></div></div>
+            <div class="agent"><h4>📍 Geo</h4><div class="role">Contexte géo</div><div class="alert-meta" id="ag-geo-detail">—</div><div class="kv"><span>Résolu</span><b id="ag-geo-res">—</b></div><div class="kv"><span>Zone</span><b id="ag-geo-zone">—</b></div></div>
+            <div class="agent"><h4>📚 Research</h4><div class="role">Contexte vérifié</div><div class="alert-meta" id="ag-res-detail">—</div><div class="kv"><span>Refs</span><b id="ag-res-refs">—</b></div><div class="kv"><span>Vérifié</span><b id="ag-res-ver">—</b></div></div>
+            <div class="agent"><h4>🧪 Analysis</h4><div class="role">Grille risque</div><div class="alert-meta" id="ag-an-detail">—</div><div class="kv"><span>Risque</span><b id="ag-an-risk">—</b></div><div class="kv"><span>Simulé</span><b id="ag-an-sim">—</b></div></div>
+          </div>
+        </div>
+
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:14px">
+          <div class="card" id="flux">
+            <h3>Flux temps réel (WS)</h3>
+            <div id="events" class="events-mini"><div class="alert-meta">Connexion…</div></div>
+          </div>
+          <div class="card">
+            <h3>Dernière orchestration</h3>
+            <pre id="orchOut" class="json">{}</pre>
+            <div id="log" class="log" style="margin-top:8px"></div>
+          </div>
+        </div>
+      </div>
+
+      <p style="text-align:center;color:var(--faint);font-size:11px;margin-top:18px">Eco Sentinel Africa — Abidjan · pipeline fiable, pas un chatbot · SAM détecte, ne prouve pas la toxicité</p>
+    </div>
+  </div>
+</div>
+
+<script>
+const $ = id => document.getElementById(id);
+const logEl=$('log'), evEl=$('events'), alertsList=$('alertsList');
+function log(m){ if(!logEl) return; logEl.textContent += m+"\\n"; logEl.scrollTop=logEl.scrollHeight; }
+// === SON D'ALERTE + CLIGNOTEMENT ===
+let soundOn=true; const soundToggle=$('soundToggle');
+soundToggle.addEventListener('click',()=>{ soundOn=!soundOn; soundToggle.textContent=soundOn?'🔊 Son ON':'🔇 Son OFF'; if(soundOn) playBeep('low'); });
+let audioCtx=null;
+function playBeep(sev){
+  if(!soundOn) return;
+  try{
+    if(!audioCtx) audioCtx=new (window.AudioContext||window.webkitAudioContext)();
+    if(audioCtx.state==='suspended') audioCtx.resume();
+    const o=audioCtx.createOscillator(), g=audioCtx.createGain();
+    o.connect(g); g.connect(audioCtx.destination);
+    const isCritical=sev==='critical', isHigh=sev==='high';
+    o.frequency.value=isCritical?880:isHigh?660:520;
+    o.type='sine';
+    g.gain.value=0.22;
+    o.start();
+    g.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime+0.22);
+    o.stop(audioCtx.currentTime+0.24);
+    if(isCritical){
+      setTimeout(()=>{ const o2=audioCtx.createOscillator(), g2=audioCtx.createGain(); o2.connect(g2); g2.connect(audioCtx.destination); o2.frequency.value=880; g2.gain.value=0.22; o2.start(); g2.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime+0.22); o2.stop(audioCtx.currentTime+0.24); },260);
+    }
+  }catch(e){ log('audio err '+e); }
+}
+function flashDanger(sev){
+  const card=document.querySelector('.live-card');
+  if(!card) return;
+  card.classList.remove('danger'); void card.offsetWidth; card.classList.add('danger');
+  setTimeout(()=>card.classList.remove('danger'),3200);
+  if(navigator.vibrate && (sev==='high'||sev==='critical')) navigator.vibrate([180,80,180]);
+}
+
+// Sidebar mobile
+const sidebar=$('sidebar'), backdrop=$('backdrop'), ham=$('hamburger');
+function toggleSide(){ sidebar.classList.toggle('open'); backdrop.classList.toggle('show'); }
+ham.addEventListener('click', toggleSide);
+backdrop.addEventListener('click', toggleSide);
+
+// Clock
+function tick(){
+  const now=new Date();
+  const fmt= now.toLocaleDateString('fr-FR',{weekday:'short', day:'2-digit', month:'short', year:'numeric'}) + ' · ' + now.toLocaleTimeString('fr-FR');
+  $('timeText').textContent=fmt;
+  $('liveClock').textContent=now.toLocaleTimeString('fr-FR',{hour12:false});
+}
+setInterval(tick,1000); tick();
+
+// Tabs live
+document.querySelectorAll('[data-tab]').forEach(b=>{
+  b.addEventListener('click',()=>{
+    const t=b.dataset.tab;
+    $('tabBoxes').style.display=t==='boxes'?'block':'none';
+    $('tabJson').style.display=t==='json'?'block':'none';
+    $('tabExplain').style.display=t==='explain'?'block':'none';
+  });
+});
+
+// Gauges helper
+function setGauge(id, pct, color){
+  const el=$(id); if(!el) return;
+  const circ=2*Math.PI*40; // 251.3
+  const off=circ*(1-pct/100);
+  el.style.strokeDashoffset=String(off);
+  if(color) el.style.stroke=color;
+}
+setGauge('gCpuFg',45); setGauge('gMemFg',38); setGauge('gStoFg',78); setGauge('gNetFg',62);
+
+// Health & counts -> map to 4 stat cards
+async function refreshHealth(){
+  try{
+    const r=await fetch('/health'); const j=await r.json();
+    $('healthBox').innerHTML='<b style="color:var(--text)">'+j.app+'</b> · env <code>'+j.env+'</code> · <span style="color:var(--green)">'+j.status+'</span> · events '+j.counts.events+' · alerts '+j.counts.alerts;
+    $('modelBox').textContent='vision '+j.vision+' · router '+j.router;
+    // derive gauges a bit from counts
+    const cpu = Math.min(92, 32 + j.counts.events*2);
+    $('gCpuVal').textContent=cpu+'%';
+    $('gCpuSub').textContent='load '+(cpu/20).toFixed(1);
+    setGauge('gCpuFg', cpu);
+  }catch(e){ $('healthBox').textContent='Health indisponible'; }
+}
+async function refreshCounts(){
+  try{
+    const [rE,rA,rS]=await Promise.all([fetch('/events'), fetch('/alerts'), fetch('/sources')]);
+    const jE=await rE.json(), jA=await rA.json(), jS=await rS.json();
+    const totalDet=jE.length, alertsToday=jA.length, totalCams=jS.length;
+    const activeCams=jS.filter(s=>s.connected).length || (totalCams>0? totalCams: 0);
+    $('kTotalDet').textContent=String(totalDet);
+    $('kAlertsToday').textContent=String(alertsToday);
+    $('kTotalCams').textContent=String(totalCams || 4);
+    $('kActiveCams').textContent=String(activeCams || 3);
+    $('kTotalDetSub').textContent=totalDet? 'événements':'aucun événement';
+    // render alerts log from store (right panel)
+    if(jA.length===0 && jE.length===0){
+      alertsList.innerHTML='<div class="alert-meta" style="padding:12px">Aucune alerte — dépose une image pour tester.</div>';
+    } else {
+      // build from alerts + events fallback
+      const items=[];
+      for(const al of jA.slice(0,8)){
+        const sev=(al.severity||'low').toLowerCase();
+        const cls= sev==='critical'||sev==='high'?'high': sev==='medium'?'medium':'low';
+        items.push('<div class="alert-item '+cls+'"><div class="alert-top"><span class="alert-title">'+(al.title||al.severity||'Alerte')+'</span><span class="alert-sev '+cls+'">'+sev+'</span></div><div class="alert-meta">CAM '+(al.source_id||'—')+' · '+(al.category||'')+'</div><div class="alert-time">'+new Date(al.timestamp||Date.now()).toLocaleTimeString('fr-FR')+' · Type '+(al.risk_level||sev)+'</div></div>');
+      }
+      if(items.length===0){
+        for(const ev of jE.slice(0,8)){
+          const det=ev.detection?.results?.[0];
+          const risk=ev.risk_level||'low';
+          const cls=risk==='critical'||risk==='high'?'high': risk==='medium'?'medium':'low';
+          items.push('<div class="alert-item '+cls+'"><div class="alert-top"><span class="alert-title">'+(det? det.category: 'Détection')+'</span><span class="alert-sev '+cls+'">'+risk+'</span></div><div class="alert-meta">'+ev.source_id+' · score '+(det? det.score:'—')+'</div><div class="alert-time">'+new Date(ev.timestamp).toLocaleTimeString('fr-FR')+' · Type polling</div></div>');
+        }
+      }
+      alertsList.innerHTML=items.join('') || '<div class="alert-meta" style="padding:12px">Aucune alerte.</div>';
+    }
+    // pipeline highlight
+    document.querySelectorAll('.step').forEach(s=>s.classList.remove('active'));
+    const active = jE.length>0?5:1;
+    const el=document.querySelector('.step[data-step="'+active+'"]');
+    if(el) el.classList.add('active');
+  }catch(e){ log('counts error '+e); }
+}
+$('btnRefresh').addEventListener('click', ()=>{ refreshHealth(); refreshCounts(); });
+refreshHealth(); refreshCounts(); setInterval(()=>{refreshHealth();refreshCounts();},5000);
+
+// Preview + bbox
+const previewImg=$('previewImg'), previewVideo=$('previewVideo'), bboxLayer=$('bboxLayer'), overlay=$('overlay'), liveBody=$('liveBody'), placeholder=$('previewPlaceholder');
+let lastBoxes=[];
+function clearBBoxes(){ bboxLayer.innerHTML=''; const svg=document.getElementById('maskSvg'); if(svg) svg.innerHTML=''; const ctx=overlay.getContext('2d'); if(ctx) ctx.clearRect(0,0,overlay.width,overlay.height); }
+function drawBoxes(boxes){
+  clearBBoxes();
+  if(!boxes.length) return;
+  const rect=liveBody.getBoundingClientRect();
+  // use displayed image size to map 0-1 relative coords
+  const target = previewImg.style.display!=='none' ? previewImg : previewVideo;
+  if(!target || target.style.display==='none'){ // fallback to container (fichier image)
+    // SVG percent mode : viewBox 100x100
+    const svg=document.getElementById('maskSvg');
+    if(svg){ svg.setAttribute('viewBox','0 0 100 100'); svg.setAttribute('preserveAspectRatio','none'); }
+    boxes.forEach(b=>{
+      const d=document.createElement('div');
+      const cat=(b.category||'obj').toLowerCase().replace(/[^a-z_]/g,'');
+      const cls=['waste','plastic_bottle','container','debris','dumping'].includes(cat)?cat: (cat.includes('vehicle')?'vehicle':'waste');
+      d.className='bbox '+cls;
+      d.style.left=(b.x*100)+'%'; d.style.top=(b.y*100)+'%'; d.style.width=(b.width*100)+'%'; d.style.height=(b.height*100)+'%';
+      const lab=document.createElement('div'); lab.className='bbox-label'; lab.textContent=(b.category||'obj')+' '+(b.score!=null? Number(b.score).toFixed(2):'');
+      d.appendChild(lab);
+      bboxLayer.appendChild(d);
+      if(b.mask) drawMask(b.mask, CATEGORY_COLOR[cls]||'#1DBA54', null, rect);
+    });
+    return;
+  }
+  // pixel precise using overlay canvas for intrusion zone example
+  const dispW=target.clientWidth, dispH=target.clientHeight;
+  const offX=(rect.width - dispW)/2, offY=(rect.height - dispH)/2;
+  overlay.width=rect.width; overlay.height=rect.height;
+  // we also use DOM boxes for labels
+  boxes.forEach(b=>{
+    const d=document.createElement('div');
+    const cat=(b.category||'obj').toLowerCase().replace(/[^a-z_]/g,'');
+    const cls=['waste','plastic_bottle','container','debris','dumping'].includes(cat)?cat: (cat.includes('vehicle')?'vehicle':'waste');
+    d.className='bbox '+cls;
+    const x=offX + b.x*dispW, y=offY + b.y*dispH, w=b.width*dispW, h=b.height*dispH;
+    d.style.left=x+'px'; d.style.top=y+'px'; d.style.width=w+'px'; d.style.height=h+'px';
+    const lab=document.createElement('div'); lab.className='bbox-label'; lab.textContent=(b.category||'obj')+' '+ (b.score!=null? Number(b.score).toFixed(2):'');
+    d.appendChild(lab);
+    bboxLayer.appendChild(d);
+    if(b.mask) drawMask(b.mask, CATEGORY_COLOR[cls]||'#1DBA54', target, rect);
+  });
+  // reset viewBox for pixel mode
+  const svg=document.getElementById('maskSvg'); if(svg){ svg.removeAttribute('viewBox'); }
+  // intrusion zone mimic (red rectangle on right side) if any high risk
+  const hasHigh = boxes.some(b=> (b.score||0) > 0.8);
+  $('intrusionLabel').style.display='block';
+}
+function drawMask(mask, color, target, rect){
+  const svg=document.getElementById('maskSvg'); if(!svg || !mask || mask.length<3) return;
+  const isVideo = target && target.style.display!=='none';
+  let pts='';
+  if(isVideo){
+    const dispW=target.clientWidth, dispH=target.clientHeight;
+    const offX=(rect.width - dispW)/2, offY=(rect.height - dispH)/2;
+    mask.forEach(([mx,my])=>{ pts+= (offX+ mx*dispW)+','+(offY+ my*dispH)+' '; });
+  } else {
+    mask.forEach(([mx,my])=>{ pts+= (mx*100)+'% '+(my*100)+'% '; });
+    // for percent mode we need svg with viewBox 0 0 100 100
+  }
+  const poly=document.createElementNS('http://www.w3.org/2000/svg','polygon');
+  poly.setAttribute('points',pts.trim());
+  poly.setAttribute('fill',color);
+  poly.setAttribute('fill-opacity','0.22');
+  poly.setAttribute('stroke',color);
+  poly.setAttribute('stroke-width','1.5');
+  poly.setAttribute('stroke-opacity','0.9');
+  svg.appendChild(poly);
+}
+const CATEGORY_COLOR={waste:'#1DBA54',plastic_bottle:'#2AB4D9',container:'#EAB308',debris:'#F97316',dumping:'#EF4444',vehicle:'#EAB308',person:'#1DBA54'};
+function showBoxesList(boxes){
+  if(!boxes.length){ $('boxesList').innerHTML='<span class="alert-meta">Aucune détection.</span>'; $('boxesInfo').textContent=''; return; }
+  $('boxesList').innerHTML = boxes.map(b=>'<div style="display:flex;justify-content:space-between;border:1px solid var(--card-border);border-radius:10px;padding:8px 10px;margin:6px 0;background:#0D1F38"><span><b>'+b.category+'</b> <span class="alert-meta">score '+Number(b.score).toFixed(2)+'</span></span><span class="alert-meta">x'+b.x.toFixed(2)+' y'+b.y.toFixed(2)+' w'+b.width.toFixed(2)+' h'+b.height.toFixed(2)+'</span></div>').join('');
+  $('boxesInfo').textContent=boxes.length+' boîte(s)';
+  $('jsonOut').textContent=JSON.stringify(boxes, null, 2);
+}
+function setPreviewImage(src){
+  previewVideo.style.display='none'; previewVideo.pause();
+  previewImg.style.display='block'; previewImg.src=src;
+  placeholder.style.display='none';
+  previewImg.onload=()=>{ overlay.width=liveBody.clientWidth; overlay.height=liveBody.clientHeight; if(lastBoxes.length) drawBoxes(lastBoxes); };
+}
+
+// File handling
+const fileInput=$('fileInput');
+let pendingFile=null;
+fileInput.addEventListener('change', e=>{
+  const f=e.target.files[0]; if(!f) return;
+  pendingFile=f;
+  if(f.type.startsWith('video/')){
+    previewImg.style.display='none';
+    previewVideo.style.display='block';
+    placeholder.style.display='none';
+    previewVideo.src=URL.createObjectURL(f);
+    $('previewMeta').textContent='Vidéo '+f.name+' · '+(f.size/1e6).toFixed(2)+' MB';
+  } else {
+    setPreviewImage(URL.createObjectURL(f));
+    $('previewMeta').textContent='Image '+f.name+' · '+(f.size/1e6).toFixed(2)+' MB';
+  }
+});
+$('btnClear').addEventListener('click',()=>{
+  previewImg.style.display='none'; previewVideo.style.display='none'; placeholder.style.display='grid';
+  clearBBoxes(); lastBoxes=[]; $('boxesList').innerHTML='<span class="alert-meta">Aperçu effacé.</span>'; $('jsonOut').textContent='{}'; $('uploadResult').textContent=''; $('previewMeta').textContent='';
+  pendingFile=null; fileInput.value='';
+});
+
+async function uploadOneImageFile(file){
+  const fd=new FormData(); fd.append('file', file); fd.append('source_id','camera_001');
+  const r=await fetch('/ingest/image',{method:'POST',body:fd}); const j=await r.json();
+  $('uploadResult').textContent=j.status||'ok';
+  log('upload '+j.status+' '+j.source_id);
+  return j;
+}
+async function uploadB64(bytes, source='camera_001'){
+  const b64=btoa(String.fromCharCode(...bytes));
+  const r=await fetch('/ingest/b64',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({source_id:source,b64})});
+  const j=await r.json(); $('uploadResult').textContent=j.status||'ok'; log('b64 '+j.status); return j;
+}
+async function extractVideoFrames(file, fps=1){
+  return new Promise(resolve=>{
+    const v=document.createElement('video');
+    v.src=URL.createObjectURL(file); v.muted=true; v.playsInline=true;
+    v.onloadedmetadata=async()=>{
+      const dur=v.duration, canvas=document.createElement('canvas'), ctx=canvas.getContext('2d');
+      canvas.width=v.videoWidth; canvas.height=v.videoHeight;
+      const frames=[];
+      for(let t=0; t<dur; t+=1/fps){
+        v.currentTime=t;
+        await new Promise(r=> v.onseeked=r);
+        ctx.drawImage(v,0,0);
+        const blob=await new Promise(r=> canvas.toBlob(r,'image/jpeg',0.82));
+        const buf=await blob.arrayBuffer();
+        frames.push(new Uint8Array(buf));
+        if(frames.length>=4) break;
+      }
+      resolve(frames);
+    };
+    v.onerror=()=>resolve([]);
+  });
+}
+$('btnUpload').addEventListener('click', async()=>{
+  const f=pendingFile || fileInput.files[0];
+  if(!f) return alert('Choisis une image ou vidéo');
+  $('btnUpload').disabled=true;
+  try{
+    if(f.type.startsWith('video/')){
+      log('vidéo → extraction 1 fps…');
+      const frames=await extractVideoFrames(f, 1);
+      log('→ '+frames.length+' frame(s), envoi…');
+      for(let i=0;i<frames.length;i++){ await uploadB64(frames[i], 'camera_video'); await new Promise(r=>setTimeout(r,400)); }
+      log('vidéo ingérée');
+    } else {
+      await uploadOneImageFile(f);
+    }
+    setTimeout(refreshCounts,800);
+  } finally { $('btnUpload').disabled=false; }
+});
+// Simulation désactivée pour présentation jury — debug seulement si ?mock=1 dans l'URL
+if(new URLSearchParams(location.search).has('mock')){
+  const b=document.createElement('button'); b.textContent='Frame mock (debug)'; b.className='btn ghost'; b.style.cssText='padding:6px 10px;font-size:11px'; b.id='btnMock';
+  document.getElementById('demo').appendChild(b);
+  b.addEventListener('click', async()=>{
+    const bytes=new TextEncoder().encode('waste mock frame '+Date.now());
+    await uploadB64(bytes);
+    setTimeout(refreshCounts,600);
+  });
+}
+// === CAMÉRA RÉELLE (getUserMedia) — jury hackathon ===
+let camStream=null, captureTimer=null, captureCount=0, camDeviceId=null;
+const camSelect=$('camSelect'), btnCamOn=$('btnCamOn'), btnCamStart=$('btnCamStart'), btnCamStop=$('btnCamStop'), camStatus=$('camStatus');
+
+async function enumerateCams(){
+  try{
+    const devices=await navigator.mediaDevices.enumerateDevices();
+    const cams=devices.filter(d=>d.kind==='videoinput');
+    camSelect.innerHTML='';
+    if(cams.length===0){ camSelect.innerHTML='<option>Aucune caméra détectée</option>'; return; }
+    cams.forEach((c,i)=>{
+      const o=document.createElement('option');
+      o.value=c.deviceId; o.textContent=c.label || `Caméra ${i+1}`;
+      camSelect.appendChild(o);
+    });
+    camDeviceId=cams[0].deviceId;
+  }catch(e){ camSelect.innerHTML='<option>Permission requise</option>'; }
+}
+if(navigator.mediaDevices?.enumerateDevices) enumerateCams();
+camSelect.addEventListener('change', e=>{ camDeviceId=e.target.value; if(camStream){ activateCamera(); }});
+
+async function activateCamera(){
+  const isSecure = location.protocol==='https:' || location.hostname==='localhost' || location.hostname==='127.0.0.1';
+  if(!isSecure){
+    camStatus.textContent='⚠️ HTTPS ou localhost requis pour la caméra';
+    camStatus.style.color='var(--yellow)';
+    alert('La caméra nécessite HTTPS ou localhost. Ouvre http://localhost:8000/dashboard sur le laptop qui présente.');
+    return;
+  }
+  if(!navigator.mediaDevices?.getUserMedia){
+    camStatus.textContent='getUserMedia non supporté';
+    alert('Navigateur incompatible avec getUserMedia. Utilise Chrome/Edge récent.');
+    return;
+  }
+  try{
+    if(camStream) camStream.getTracks().forEach(t=>t.stop());
+    const constraints={ video: camDeviceId ? {deviceId:{exact:camDeviceId}, width:{ideal:1280}, height:{ideal:720}} : {width:{ideal:1280}, height:{ideal:720}}, audio:false };
+    camStream=await navigator.mediaDevices.getUserMedia(constraints);
+    previewImg.style.display='none';
+    previewVideo.style.display='block';
+    placeholder.style.display='none';
+    previewVideo.srcObject=camStream;
+    previewVideo.muted=true; previewVideo.playsInline=true;
+    await previewVideo.play();
+    camStatus.textContent='● Caméra active — prête';
+    camStatus.style.color='var(--green)';
+    btnCamStart.disabled=false;
+    $('liveCamLabel').textContent='CAM 1 · '+ (camSelect.options[camSelect.selectedIndex]?.textContent || 'Webcam');
+    if(navigator.mediaDevices.enumerateDevices) enumerateCams();
+    log('caméra activée '+(camSelect.options[camSelect.selectedIndex]?.textContent||''));
+  }catch(e){
+    camStatus.textContent='❌ '+ (e.name==='NotAllowedError' ? 'Permission refusée' : e.message);
+    camStatus.style.color='var(--red)';
+    log('cam error '+e.name+': '+e.message);
+    if(e.name==='NotAllowedError') alert('Permission caméra refusée. Autorise la caméra dans la barre d’adresse puis réessaie.');
+  }
+}
+btnCamOn.addEventListener('click', activateCamera);
+
+function captureFrameToBlob(){
+  if(!camStream || previewVideo.videoWidth===0) return null;
+  const canvas=document.createElement('canvas');
+  canvas.width=previewVideo.videoWidth; canvas.height=previewVideo.videoHeight;
+  const ctx=canvas.getContext('2d');
+  ctx.drawImage(previewVideo,0,0);
+  return new Promise(res=> canvas.toBlob(b=> res(b), 'image/jpeg', 0.82));
+}
+async function sendCapture(){
+  const blob=await captureFrameToBlob();
+  if(!blob){ camStatus.textContent='⚠️ Pas d’image'; return; }
+  try{
+    const fd=new FormData(); fd.append('file', blob, 'capture_'+Date.now()+'.jpg'); fd.append('source_id','camera_live');
+    const r=await fetch('/ingest/image',{method:'POST', body:fd});
+    const j=await r.json();
+    captureCount++; $('captureCount').textContent=captureCount+' captures envoyées';
+    $('uploadResult').textContent='✓ '+(j.status||'ok')+' · '+(j.source_id||'camera_live');
+    log('capture #'+captureCount+' → '+j.status);
+  }catch(e){ log('capture err '+e); camStatus.textContent='Erreur envoi'; }
+}
+btnCamStart.addEventListener('click', ()=>{
+  if(!camStream){ alert('Active d’abord la caméra'); return; }
+  if(captureTimer) return;
+  captureTimer=setInterval(sendCapture, 1500);
+  camStatus.textContent='⏺ Surveillance active — 1 img/s';
+  camStatus.style.color='var(--green)';
+  btnCamStart.disabled=true; btnCamStop.disabled=false; btnCamOn.disabled=true;
+  log('surveillance démarrée 1 fps');
+  sendCapture();
+});
+btnCamStop.addEventListener('click', ()=>{
+  if(captureTimer){ clearInterval(captureTimer); captureTimer=null; }
+  camStatus.textContent='⏹ Arrêtée — '+captureCount+' captures';
+  camStatus.style.color='var(--muted)';
+  btnCamStart.disabled=false; btnCamStop.disabled=true; btnCamOn.disabled=false;
+  log('surveillance arrêtée');
+});
+window.addEventListener('beforeunload', ()=>{
+  if(camStream) camStream.getTracks().forEach(t=>t.stop());
+  if(captureTimer) clearInterval(captureTimer);
+});
+
+// WS live + agent hydration
+function setAgentTags(orch){
+  if(!orch) return;
+  const c=orch.classification||{}, g=orch.geo||{}, rs=orch.research||{}, an=orch.analysis||{};
+  $('ag-class-prov').textContent=c.provider||'—'; $('ag-class-prov').className='tag '+(c.provider==='meta'?'meta':'mock');
+  $('ag-class-detail').textContent=c.label ? c.label+' · conf '+c.confidence : (c.classification||'—');
+  $('ag-class-lat').textContent=orch.a2a_latencies? Math.round(orch.a2a_latencies.classification)+' ms' : '—';
+  $('ag-geo-detail').textContent=g.message || (g.resolved? 'zone '+g.zone : 'non résolue');
+  $('ag-geo-res').textContent= g.resolved? 'oui':'non';
+  $('ag-geo-zone').textContent= g.zone||'—';
+  $('ag-res-detail').textContent= rs.context? rs.context.slice(0,110) : '—';
+  $('ag-res-refs').textContent= (rs.references||[]).length;
+  $('ag-res-ver').textContent= rs.verified? 'oui':'non';
+  $('ag-an-detail').textContent= an.synthesis ? an.synthesis.slice(0,120)+'…' : (an.risk_rationale||'—');
+  $('ag-an-risk').textContent= an.risk_level||'—';
+  $('ag-an-sim').textContent= an.simulated? 'oui':'non';
+  const wp=orch.wonder_plan;
+  $('ag-router-detail').textContent= wp? wp.workflow+' · prio '+wp.priority : 'standard (fallback)';
+  $('ag-router-plan').textContent= wp? wp.workflow : 'standard';
+  $('ag-vision-detail').textContent= orch.event_id? 'event '+orch.event_id.slice(0,8) : '—';
+  // --- LIVE PANEL à côté du flux (jury) ---
+  const alV=$('al-v-detail'), alVm=$('al-v-model'), alR=$('al-r-detail'), alRp=$('al-r-plan'), alC=$('al-c-detail'), alCl=$('al-c-lat'), alG=$('al-g-detail'), alGz=$('al-g-zone'), alRes=$('al-res-detail'), alResR=$('al-res-refs'), alAn=$('al-an-detail'), alAnR=$('al-an-risk');
+  if(alV){ alV.textContent= orch.event_id? '● '+orch.event_id.slice(0,6) : 'analyse…'; if($('al-v-model')) $('al-v-model').textContent=c.provider==='meta'?'SAM 3.1':'SAM mock'; }
+  if(alR) alR.textContent= wp? wp.workflow : 'standard';
+  if(alRp) alRp.textContent= wp? wp.workflow : 'standard';
+  if(alC) alC.textContent=c.label ? c.label.slice(0,28) : (c.classification||'—');
+  if(alCl) alCl.textContent=orch.a2a_latencies? Math.round(orch.a2a_latencies.classification)+'ms' : '—';
+  if(alG) alG.textContent=g.resolved? '✓ '+g.zone : 'non résolue';
+  if(alGz) alGz.textContent=g.zone||'—';
+  if(alRes) alRes.textContent= rs.context? rs.context.slice(0,40)+'…' : '—';
+  if(alResR) alResR.textContent= (rs.references||[]).length;
+  if(alAn) alAn.textContent= an.risk_rationale? an.risk_rationale.slice(0,40)+'…' : (an.risk_level||'—');
+  if(alAnR) { alAnR.textContent= an.risk_level||'—'; alAnR.style.color= an.risk_level==='high'||an.risk_level==='critical' ? 'var(--red)' : an.risk_level==='medium' ? 'var(--orange)' : 'var(--green)'; }
+  const liveStatus=$('agentsLiveStatus'); if(liveStatus) liveStatus.textContent='● '+new Date().toLocaleTimeString('fr-FR')+' · '+(an.risk_level||'low');
+  document.querySelectorAll('#agentsLive .agent').forEach(a=>{ a.classList.add('working'); setTimeout(()=>a.classList.remove('working'),1100); });
+}
+
+let ws; let wsConnectedAt=0;
+function connect(){
+  const proto=location.protocol==='https:'?'wss:':'ws:';
+  ws=new WebSocket(proto+location.host+'/ws/events');
+  ws.onopen=()=>{ wsConnectedAt=Date.now(); log('WS connecté'); };
+  ws.onclose=()=>{ log('WS fermé — reconnexion 2s'); setTimeout(connect,2000); };
+  ws.onerror=()=>log('WS erreur');
+  ws.onmessage=(e)=>{
+    const msg=JSON.parse(e.data);
+    if(msg.type==='event'){
+      const ev=msg.event, al=msg.alert, orch=msg.orchestration||{};
+      const sev=al? (al.severity==='critical'?'critical': al.severity==='high'?'warning':'info') : (ev.risk_level==='high'?'warning': ev.risk_level==='critical'?'critical':'info');
+      const sim=ev.simulated?' <span style="font-size:10px;background:#334155;padding:2px 6px;border-radius:6px;margin-left:6px">SIMULÉ</span>':'';
+      const det=ev.detection?.results?.[0];
+      evEl.insertAdjacentHTML('afterbegin', '<div class="ev '+sev+'"><b>'+ev.source_id+'</b> — '+(det? det.category: '?')+' score '+(det? det.score: '?')+sim+'<div class="alert-meta">'+(ev.trigger_reason||'')+' · risque '+ev.risk_level+' · '+new Date(ev.timestamp).toLocaleString()+'</div>'+(al?'<div style="color:var(--red);font-size:12px">🚨 '+al.severity+' — '+al.title+'</div>':'')+'<div class="alert-meta" style="margin-top:6px">corr '+ev.correlation_id.slice(0,8)+'</div></div>');
+      $('orchOut').textContent=JSON.stringify({event:ev, alert:al, orchestration:orch}, null, 2);
+      $('jsonOut').textContent=JSON.stringify(ev, null, 2);
+      const boxes=(ev.detection?.results||[]).map(r=>({category:r.category, score:r.score, mask:r.mask, ...r.bbox}));
+      if(boxes.length){ lastBoxes=boxes; showBoxesList(boxes); drawBoxes(boxes); }
+      setAgentTags({ ...orch, event_id: ev.event_id });
+      // animation travail agents
+      document.querySelectorAll('.agent').forEach(a=>{ a.classList.add('working'); setTimeout(()=>a.classList.remove('working'),1200); });
+      // défile vers agents pour montrer le travail (jury)
+      // agents déjà visibles à côté du flux — pas de scroll
+      refreshCounts();
+      const prov = ev.detection?.model?.includes('mock') ? 'mock' : 'meta';
+      $('ag-vision-prov').textContent=prov; $('ag-vision-prov').className='tag '+(prov==='meta'?'meta':'mock');
+      $('ag-vision-model').textContent=ev.detection?.model||'sam-3.1';
+      // push to alerts log live + bip + clignotement danger
+      const risk=ev.risk_level||'low';
+      const cls=risk==='critical'||risk==='high'?'high': risk==='medium'?'medium':'low';
+      const sevForBeep=al? al.severity : risk;
+      const title = al? al.title : (det? ('Détection '+det.category) : 'Événement');
+      if(alertsList.querySelector('.alert-meta') && alertsList.textContent.includes('Aucune')){
+        alertsList.innerHTML='';
+      }
+      alertsList.insertAdjacentHTML('afterbegin','<div class="alert-item '+cls+' blink"><div class="alert-top"><span class="alert-title">'+title+'</span><span class="alert-sev '+cls+'">'+risk+'</span></div><div class="alert-meta">'+ev.source_id+' · '+(det? det.category:'')+' · '+boxes.length+' objet(s)</div><div class="alert-time">'+new Date(ev.timestamp).toLocaleTimeString('fr-FR')+' · Type '+(det? det.category:'pollution')+'</div></div>');
+      // alerte sonore au déclenchement — tout trigger non-historique doit sonner
+      const ageMs = Date.now() - new Date(ev.timestamp).getTime();
+      const isHistoric = ageMs > 15000 || Date.now() - wsConnectedAt < 1500;
+      if(!isHistoric){
+        if(risk==='high'||risk==='critical'||sevForBeep==='high'||sevForBeep==='critical'){
+          playBeep(sevForBeep); flashDanger(sevForBeep);
+        } else if(boxes.length || al){
+          playBeep('low');
+        }
+      } else {
+        // historique rejoué à la connexion : sans son ni blink
+        const lastBlink=document.querySelector('#alertsList .alert-item'); if(lastBlink) lastBlink.classList.remove('blink');
+      }
+    }
+  };
+}
+connect();
+window.addEventListener('resize', ()=>{ if(lastBoxes.length) drawBoxes(lastBoxes); });
+</script>
+</body>
+</html>

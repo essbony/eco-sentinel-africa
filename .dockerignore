@@ -1,0 +1,59 @@
+# Git
+.git
+.gitignore
+.github
+
+# Python
+__pycache__
+*.py[cod]
+*.pyo
+*.pyd
+*.egg-info
+.eggs
+dist
+build
+*.whl
+*.egg
+
+# Environnements & caches
+.venv
+venv
+.env
+.env.*
+!.env.example
+.pytest_cache
+.coverage
+coverage.xml
+htmlcov
+.hypothesis
+.mypy_cache
+.ruff_cache
+.pyre
+.pytype
+
+# IDE / OS
+.vscode
+.idea
+*.swp
+*.swo
+*~
+.DS_Store
+Thumbs.db
+
+# Data volumineuse (gardée hors image)
+data/raw
+data/processed
+logs
+*.log
+# DeepEval : cache et résultats hors image (volumes nommés)
+.deepeval/
+evals/results/
+evals/.deepeval/
+
+# Docker — Makefile ignoré (Dockerfile/compose gardés dans le contexte)
+Makefile
+
+# Docs & CI non nécessaires en prod (uv.lock gardé pour build --frozen)
+docs
+tests
+.python-version

@@ -1,0 +1,2 @@
+{"input": "Quelle est la santé de l'API ?", "expected": "ok", "context": ["GET /health -> status ok"]}
+{"input": "L'API répond-elle ?", "expected": "meta-ai-dev API — voir /docs", "context": ["GET / -> message"]}

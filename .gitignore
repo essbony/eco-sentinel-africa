@@ -1,0 +1,53 @@
+# Python
+__pycache__/
+*.py[cod]
+*.pyo
+*.pyd
+*.egg-info/
+.eggs/
+dist/
+build/
+*.whl
+
+# Environnement
+.venv/
+venv/
+.env
+.env.*
+!.env.example
+
+# uv
+uv.lock
+.python-version
+
+# Tests & coverage
+.pytest_cache/
+.coverage
+coverage.xml
+htmlcov/
+.hypothesis/
+
+# Mypy / Ruff
+.mypy_cache/
+.ruff_cache/
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+.DS_Store
+
+# Data (hors exemples)
+data/raw/*
+data/processed/*
+!data/.gitkeep
+
+# Logs
+logs/
+*.log
+
+# DeepEval
+.deepeval/
+evals/results/
+evals/.deepeval/

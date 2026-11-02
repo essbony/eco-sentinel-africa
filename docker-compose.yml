@@ -1,0 +1,119 @@
+name: eco-sentinel-africa
+
+services:
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+      target: runtime
+    image: eco-sentinel-africa:latest
+    container_name: eco-sentinel-africa-app
+    restart: unless-stopped
+    ports:
+      - "${API_PORT:-8000}:8000"
+    env_file:
+      - .env
+    environment:
+      APP_NAME: "${APP_NAME:-eco-sentinel-africa}"
+      ENV: "${ENV:-production}"
+      LOG_LEVEL: "${LOG_LEVEL:-INFO}"
+      API_HOST: "0.0.0.0"
+      API_PORT: "8000"
+      BASE_URL: "${BASE_URL:-https://api.meta.ai/v1}"
+      MODEL_API_KEY: "${MODEL_API_KEY:-}"
+      VISION_PROVIDER: "${VISION_PROVIDER:-meta}"
+      ROUTER_PROVIDER: "${ROUTER_PROVIDER:-meta}"
+      SPARK_PROVIDER: "${SPARK_PROVIDER:-meta}"
+    volumes:
+      - ./configs:/app/configs:ro
+    healthcheck:
+      test: ["CMD", "curl", "-sf", "http://localhost:8000/health"]
+      interval: 30s
+      timeout: 5s
+      retries: 3
+      start_period: 10s
+    networks:
+      - app-net
+
+  # ── DeepEval : évaluation batch / continue ─────────────────────
+  deepeval:
+    build:
+      context: .
+      dockerfile: Dockerfile
+      target: runtime
+    image: eco-sentinel-africa:latest
+    container_name: eco-sentinel-africa-deepeval
+    profiles:
+      - eval
+    env_file:
+      - .env
+    environment:
+      APP_NAME: "${APP_NAME:-eco-sentinel-africa}"
+      ENV: "${ENV:-development}"
+      LOG_LEVEL: "${LOG_LEVEL:-INFO}"
+      # DeepEval / LLM providers (mets tes clés dans .env, jamais en clair ici)
+      OPENAI_API_KEY: "${OPENAI_API_KEY:-}"
+      CONFIDENT_AI_API_KEY: "${CONFIDENT_AI_API_KEY:-}"
+      # Cible de l'API à évaluer (par défaut le service `app` du même compose)
+      EVAL_TARGET_URL: "${EVAL_TARGET_URL:-http://app:8000}"
+      EVAL_DATASET: "${EVAL_DATASET:-evals/datasets/golden.jsonl}"
+      EVAL_RESULTS_DIR: "${EVAL_RESULTS_DIR:-/app/evals/results}"
+    volumes:
+      # Code + datasets + résultats (lecture/écriture pour les rapports)
+      - ./src:/app/src:ro
+      - ./tests:/app/tests:ro
+      - ./evals:/app/evals
+      - ./configs:/app/configs:ro
+      - eval-results:/app/evals/results
+      - eval-cache:/app/.deepeval
+    depends_on:
+      app:
+        condition: service_healthy
+    networks:
+      - app-net
+    # Commande par défaut : lance la suite deepeval. Surchargée en CI.
+    # `deepeval test run` découvre les tests dans evals/ (voir deepeval.conf).
+    command: >
+      sh -c "deepeval test run evals/ --verbose
+      || python -m pytest evals/ -v --tb=short"
+    # Pas de restart : job batch à la demande
+    restart: "no"
+    healthcheck:
+      disable: true
+
+  # ── Décommente si j'ajoutes une base de données ──────────────
+  # db:
+  #   image: postgres:16-alpine
+  #   container_name: eco-sentinel-africa-db
+  #   restart: unless-stopped
+  #   environment:
+  #     POSTGRES_DB: "${POSTGRES_DB:-ecosentinel}"
+  #     POSTGRES_USER: "${POSTGRES_USER:-app}"
+  #     POSTGRES_PASSWORD: "${POSTGRES_PASSWORD:-change-me}"
+  #   ports:
+  #     - "${POSTGRES_PORT:-5432}:5432"
+  #   volumes:
+  #     - pgdata:/var/lib/postgresql/data
+  #   networks:
+  #     - app-net
+
+  # redis:
+  #   image: redis:7-alpine
+  #   container_name: eco-sentinel-africa-redis
+  #   restart: unless-stopped
+  #   ports:
+  #     - "${REDIS_PORT:-6379}:6379"
+  #   networks:
+  #     - app-net
+
+networks:
+  app-net:
+    driver: bridge
+
+volumes:
+  eval-results:
+    driver: local
+  eval-cache:
+    driver: local
+  # pgdata:
+  #   driver: local
