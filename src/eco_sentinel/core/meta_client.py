@@ -191,7 +191,9 @@ async def call_meta_responses(
                 msg = str(e).lower()
                 # Pour les images, on retourne direct sans fallback chat
                 if image_bytes is not None:
-                    logger.warning("Responses image échouée (%s) — pas de fallback chat: %s", model, e)
+                    logger.warning(
+                        "Responses image échouée (%s) — pas de fallback chat: %s", model, e
+                    )
                     return None
                 if "404" in msg or "not available" in msg or "not found" in msg:
                     logger.warning("Responses 404 (%s) — pas de fallback chat", model)

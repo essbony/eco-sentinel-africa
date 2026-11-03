@@ -30,7 +30,7 @@ def should_create_event(
     if best < confidence_threshold:
         return False, f"score {best:.2f} < seuil {confidence_threshold}"
 
-    # Dedup par source+catégorie — bypass pour score très élevé (>=0.93) afin de ne jamais rater une alerte critique
+    # Dedup — bypass score très élevé (>=0.93) pour ne jamais rater critique
     key = f"{source_id}:{vision_output.results[0].get('category', 'unknown')}"
     now = time.time()
     # Score critique → création immédiate, pas de dedup

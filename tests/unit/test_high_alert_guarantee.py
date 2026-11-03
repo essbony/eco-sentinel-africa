@@ -2,9 +2,9 @@
 
 import pytest
 
+from eco_sentinel.a2a.protocol import A2ARequest
 from eco_sentinel.alerts.engine import evaluate, reset
 from eco_sentinel.analysis.openai_agent import _mock_analysis, analysis_handler
-from eco_sentinel.a2a.protocol import A2ARequest
 from eco_sentinel.models.events import DetectionInfo, DetectionResult, DetectionStatus, EcoEvent
 
 
@@ -12,7 +12,9 @@ def test_high_score_bypasses_dedup_critical():
     reset()
     ev = EcoEvent(source_id="cam_high", confidence=0.95)
     ev.detection = DetectionInfo(
-        model="sam-3.1", status=DetectionStatus.detected, results=[DetectionResult(category="waste", score=0.95)]
+        model="sam-3.1",
+        status=DetectionStatus.detected,
+        results=[DetectionResult(category="waste", score=0.95)],
     )
     a1, _ = evaluate(ev, {"risk_level": "critical", "confidence": 0.95}, dedup_window_s=60)
     a2, _ = evaluate(ev, {"risk_level": "critical", "confidence": 0.95}, dedup_window_s=60)
@@ -22,7 +24,13 @@ def test_high_score_bypasses_dedup_critical():
 def test_mock_risk_grid_high():
     payload = {
         "detection": {"results": [{"category": "waste", "score": 0.88}]},
-        "classification": {"classification": "waste", "confidence": 0.88, "facts": [], "hypotheses": [], "uncertainties": []},
+        "classification": {
+            "classification": "waste",
+            "confidence": 0.88,
+            "facts": [],
+            "hypotheses": [],
+            "uncertainties": [],
+        },
     }
     res = _mock_analysis(payload)
     assert res["risk_level"] == "high"
@@ -33,8 +41,15 @@ def test_mock_risk_grid_high():
 async def test_analysis_overrides_meta_low_with_mock_high(monkeypatch):
     payload = {
         "detection": {"results": [{"category": "waste", "score": 0.88}]},
-        "classification": {"classification": "waste", "confidence": 0.88, "facts": [], "hypotheses": [], "uncertainties": []},
+        "classification": {
+            "classification": "waste",
+            "confidence": 0.88,
+            "facts": [],
+            "hypotheses": [],
+            "uncertainties": [],
+        },
     }
+
     # Simule Meta qui répond low alors que le score mock indique high
     async def fake_call_meta(_payload):
         return {"risk_level": "low", "synthesis": "meta low", "confidence": 0.4, "provider": "meta"}
@@ -55,10 +70,16 @@ async def test_analysis_overrides_meta_low_with_mock_high(monkeypatch):
 
         monkeypatch.setattr(cfg_mod.Settings, "is_meta_configured", lambda self: True)
         res = await analysis_handler(req)
-        assert res["risk_level"] == "high", f"Meta low ne doit pas écraser mock high, got {res['risk_level']}"
+        assert res["risk_level"] == "high", (
+            f"Meta low ne doit pas écraser mock high, got {res['risk_level']}"
+        )
         # doit déclencher une alerte
         ev = EcoEvent(source_id="cam1", confidence=res["confidence"])
-        ev.detection = DetectionInfo(model="sam", status=DetectionStatus.detected, results=[DetectionResult(category="waste", score=0.88)])
+        ev.detection = DetectionInfo(
+            model="sam",
+            status=DetectionStatus.detected,
+            results=[DetectionResult(category="waste", score=0.88)],
+        )
         reset()
         alert, _ = evaluate(ev, res, min_risk="medium", dedup_window_s=0)
         assert alert is not None

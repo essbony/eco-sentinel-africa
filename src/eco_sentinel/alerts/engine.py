@@ -60,7 +60,11 @@ def evaluate(
     effective_dedup = 0 if risk == "critical" else dedup_window_s
     key = _deduplication_key(event, rule_id)
     now = time.time()
-    if effective_dedup > 0 and key in _recent_alerts and now - _recent_alerts[key] < effective_dedup:
+    if (
+        effective_dedup > 0
+        and key in _recent_alerts
+        and now - _recent_alerts[key] < effective_dedup
+    ):
         return None, f"alerte dédupliquée (clé {key}, {now - _recent_alerts[key]:.0f}s)"
 
     _recent_alerts[key] = now
