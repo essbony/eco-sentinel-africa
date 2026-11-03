@@ -179,13 +179,27 @@ async def call_meta_responses(
         if hasattr(client, "responses"):
             try:
                 resp = await asyncio.wait_for(client.responses.create(**kwargs), timeout=timeout_s)
-                return extract_text(resp)
+                text = extract_text(resp)
+                if text and text.strip():
+                    return text
+                # Vide → si image, on ne tente pas le fallback chat (économise du temps)
+                if image_bytes is not None:
+                    logger.warning("Responses vide image (%s) — retour mock direct", model)
+                    return None
+                logger.warning("Responses vide (%s) — fallback chat", model)
             except Exception as e:
-                # Surface error details for debugging
+                msg = str(e).lower()
+                # Pour les images, on retourne direct sans fallback chat
+                if image_bytes is not None:
+                    logger.warning("Responses image échouée (%s) — pas de fallback chat: %s", model, e)
+                    return None
+                if "404" in msg or "not available" in msg or "not found" in msg:
+                    logger.warning("Responses 404 (%s) — pas de fallback chat", model)
+                    return None
                 logger.warning(
                     "Responses API échouée (%s), fallback chat.completions: %s", model, e
                 )
-        # Fallback chat.completions
+        # Fallback chat.completions (uniquement pour texte)
         messages: list[dict[str, Any]] = []
         if instructions:
             messages.append({"role": "system", "content": instructions})

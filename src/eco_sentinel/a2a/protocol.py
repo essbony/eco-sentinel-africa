@@ -47,7 +47,7 @@ class A2AResponse:
 class A2ABus:
     """Bus A2A in-process + bridge vers SDK officiel."""
 
-    def __init__(self, timeout_s: float = 10.0):
+    def __init__(self, timeout_s: float = 5.0):
         self._agents: dict[str, tuple[AgentCard, Any]] = {}
         self._executors: dict[str, Any] = {}
         self.timeout_s = timeout_s

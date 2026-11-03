@@ -55,11 +55,12 @@ def evaluate(
     if require_human_validation and risk == "critical":
         return None, "validation humaine requise pour critical"
 
-    # Déduplication
+    # Déduplication — bypass pour critical afin de ne jamais rater une alerte à score très élevé
     rule_id = f"risk>={min_risk}_conf>={min_confidence}"
+    effective_dedup = 0 if risk == "critical" else dedup_window_s
     key = _deduplication_key(event, rule_id)
     now = time.time()
-    if key in _recent_alerts and now - _recent_alerts[key] < dedup_window_s:
+    if effective_dedup > 0 and key in _recent_alerts and now - _recent_alerts[key] < effective_dedup:
         return None, f"alerte dédupliquée (clé {key}, {now - _recent_alerts[key]:.0f}s)"
 
     _recent_alerts[key] = now

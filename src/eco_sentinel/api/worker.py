@@ -66,12 +66,13 @@ async def _loop() -> None:
             event.analysis_status = AnalysisStatus.completed
             event.metadata["orchestration"] = orchestration
 
-            # Moteur d'alerte
+            # Moteur d'alerte — dedup réduit pour high/critical via engine
             alert, alert_reason = alert_evaluate(
                 event,
                 analysis,
                 min_risk=settings.alert_min_risk,
                 min_confidence=settings.alert_min_confidence,
+                dedup_window_s=getattr(settings, "alert_dedup_window_s", 8),
             )
             if alert:
                 await store.save_alert(alert)

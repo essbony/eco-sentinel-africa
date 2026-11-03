@@ -55,7 +55,7 @@ try:
         vision_model: str = Field(
             default="sam-3.1", validation_alias=AliasChoices("VISION_MODEL", "vision_model")
         )
-        vision_timeout_s: float = Field(default=10.0)
+        vision_timeout_s: float = Field(default=1.5)
         vision_categories: str = Field(default="waste,plastic_bottle,container,debris,dumping")
         vision_confidence_threshold: float = Field(default=0.5)
 
@@ -66,7 +66,7 @@ try:
         router_model: str = Field(
             default="muse-wonder-1.0", validation_alias=AliasChoices("ROUTER_MODEL", "router_model")
         )
-        router_timeout_s: float = Field(default=15.0)
+        router_timeout_s: float = Field(default=3.0)
 
         # ── Agents spécialisés (Meta Muse Spark 1.3) ──
         spark_provider: str = Field(
@@ -75,7 +75,7 @@ try:
         spark_model: str = Field(
             default="muse-spark-1.3", validation_alias=AliasChoices("SPARK_MODEL", "spark_model")
         )
-        spark_timeout_s: float = Field(default=15.0)
+        spark_timeout_s: float = Field(default=2.0)
 
         # ── Analyse — alias compat (tous les Muse utilisent le même BASE_URL + MODEL_API_KEY) ──
         openai_api_key: str = Field(
@@ -88,7 +88,7 @@ try:
             validation_alias=AliasChoices("OPENAI_MODEL", "openai_model"),
             description="Alias de SPARK_MODEL — même inference API",
         )
-        openai_timeout_s: float = Field(default=20.0, description="Alias de SPARK_TIMEOUT_S")
+        openai_timeout_s: float = Field(default=2.0, description="Alias de SPARK_TIMEOUT_S")
 
         # ── Ingestion vidéo ──
         ingestion_max_queue_size: int = Field(default=100)
@@ -101,6 +101,7 @@ try:
         event_persistence_threshold: int = Field(default=1)
         alert_min_risk: str = Field(default="medium")
         alert_min_confidence: float = Field(default=0.6)
+        alert_dedup_window_s: int = Field(default=8)
 
         # ── Persistance ──
         database_url: str = Field(default="")
@@ -119,7 +120,7 @@ try:
 
         # ── A2A ──
         a2a_enabled: bool = Field(default=True)
-        a2a_timeout_s: float = Field(default=10.0)
+        a2a_timeout_s: float = Field(default=5.0)
 
         # ── Évaluation ──
         eval_target_url: str = Field(default="http://localhost:8000")

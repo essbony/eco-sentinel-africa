@@ -81,11 +81,11 @@ async def orchestrate(event: EcoEvent) -> dict:
     set_correlation_id(event.correlation_id)
     logger.info("router orchestrate event=%s source=%s", event.event_id, event.source_id)
 
-    # Optionnel : Wonder décide du workflow (ne bloque pas si échec)
+    # Optionnel : Wonder décide du workflow (non-bloquant avec timeout court)
     try:
-        wonder_plan = await _wonder_plan(event)
+        wonder_plan = await asyncio.wait_for(_wonder_plan(event), timeout=3.0)
     except Exception as e:
-        logger.warning("Wonder indisponible: %s", e)
+        logger.warning("Wonder indisponible/timeout: %s", e)
         wonder_plan = None
 
     payload_base = {

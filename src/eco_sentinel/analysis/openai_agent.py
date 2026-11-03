@@ -99,13 +99,28 @@ def _mock_analysis(payload: dict[str, Any]) -> dict[str, Any]:
 
 async def analysis_handler(req: A2ARequest) -> dict:
     payload = req.payload
+    mock_ref = _mock_analysis(payload)
+    settings = get_settings()
+    provider = getattr(settings, "spark_provider", "mock")
+    if provider.strip().lower() != "meta" or not settings.is_meta_configured():  # type: ignore[attr-defined]
+        mock_ref["simulated"] = True
+        return mock_ref
     result = await _call_meta(payload)
     if result is not None:
-        extra = _mock_analysis(payload)
-        # La synthèse Meta prime, mais on complète avec grille risque
-        result.update({k: v for k, v in extra.items() if k not in result})
+        # La synthèse Meta prime, mais la grille risque déterministe prime
+        # pour garantir qu'un score élevé (>=0.78) déclenche toujours high/critical
+        for k, v in mock_ref.items():
+            if k not in result:
+                result[k] = v
+        # corrige risk_level si mock indique plus grave que Meta (évite faux-négatif alerte)
+        risk_order = {"low": 1, "medium": 2, "high": 3, "critical": 4}
+        meta_risk = result.get("risk_level", "low")
+        mock_risk = mock_ref.get("risk_level", "low")
+        if risk_order.get(mock_risk, 0) > risk_order.get(meta_risk, 0):
+            result["risk_level"] = mock_risk
+            result["risk_rationale"] = mock_ref["risk_rationale"]
+            result["confidence"] = max(result.get("confidence", 0), mock_ref["confidence"])
         result["simulated"] = False
         return result
-    mock = _mock_analysis(payload)
-    mock["simulated"] = True
-    return mock
+    mock_ref["simulated"] = True
+    return mock_ref
