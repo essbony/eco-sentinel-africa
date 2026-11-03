@@ -19,17 +19,11 @@ RISK_GRID = {
 
 
 async def _call_meta(payload: dict[str, Any]) -> dict[str, Any] | None:
+    """Tous les Muse partagent le même base_url + client OpenAI."""  # noqa: E501
     settings = get_settings()
-    # Modèle : OPENAI_MODEL est alias vers SPARK mais on priorise spark_model
-    model = getattr(settings, "openai_model", "") or getattr(
-        settings, "spark_model", "muse-spark-1.3"
-    )
-    # Si openai_model est encore gpt-4o-mini (ancienne valeur), on migre vers spark
-    if model == "gpt-4o-mini":
-        model = getattr(settings, "spark_model", "muse-spark-1.3")
-    timeout = float(
-        getattr(settings, "openai_timeout_s", 20.0) or getattr(settings, "spark_timeout_s", 15.0)
-    )
+    # Unifié : même BASE_URL + MODEL_API_KEY via AsyncOpenAI (Meta Dev AI)
+    model = getattr(settings, "spark_model", "muse-spark-1.3")
+    timeout = float(getattr(settings, "spark_timeout_s", 15.0))
     client = get_meta_client()
     if client is None:
         return None

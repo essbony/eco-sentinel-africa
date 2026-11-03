@@ -77,14 +77,20 @@ try:
         )
         spark_timeout_s: float = Field(default=15.0)
 
-        # ── Analyse (compat — utilise Meta si disponible) ──
+        # ── Analyse — alias compat (tous les Muse utilisent le même BASE_URL + MODEL_API_KEY) ──
         openai_api_key: str = Field(
-            default="", validation_alias=AliasChoices("OPENAI_API_KEY", "openai_api_key")
+            default="",
+            validation_alias=AliasChoices("OPENAI_API_KEY", "openai_api_key"),
+            description="Alias de MODEL_API_KEY — même base_url/client OpenAI (doc Meta Dev AI)",
         )
         openai_model: str = Field(
-            default="muse-spark-1.3", validation_alias=AliasChoices("OPENAI_MODEL", "openai_model")
+            default="muse-spark-1.3",
+            validation_alias=AliasChoices("OPENAI_MODEL", "openai_model"),
+            description="Alias de SPARK_MODEL — même inference API",
         )
-        openai_timeout_s: float = Field(default=20.0)
+        openai_timeout_s: float = Field(
+            default=20.0, description="Alias de SPARK_TIMEOUT_S"
+        )
 
         # ── Ingestion vidéo ──
         ingestion_max_queue_size: int = Field(default=100)

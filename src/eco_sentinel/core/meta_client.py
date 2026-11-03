@@ -1,4 +1,23 @@
-"""Client Meta unifié — OpenAI SDK compatible avec l'API Responses de Meta."""
+"""Client Meta unifié — tous les Muse (SAM 3.1 / Wonder / Spark) via le même base_url + OpenAI.
+
+Conforme à l'intro et à la doc officielle Meta Dev AI : un seul BASE_URL et une seule API
+d'inférence OpenAI-compatible pour tous les modèles Muse (vision + router + agents + analysis).
+
+Exemple officiel (sync) — doc Meta :
+    import os
+    from openai import OpenAI
+    client = OpenAI(
+        base_url="https://api.meta.ai/v1",
+        api_key=os.environ["MODEL_API_KEY"],
+    )
+    response = client.responses.create(
+        model="muse-spark-1.3",
+        input="What is the capital of France?",
+    )
+    print(response.model_dump_json(indent=2))
+
+Le pipeline async du projet utilise AsyncOpenAI avec la même config (voir get_meta_client).
+"""
 
 import base64
 import json
@@ -10,6 +29,34 @@ from eco_sentinel.core.logging import get_logger
 logger = get_logger("eco_sentinel.meta")
 
 _client: Any | None = None
+_sync_client: Any | None = None
+
+
+def get_sync_client() -> Any | None:
+    """Client OpenAI sync — exemple exact de la doc Meta (même base_url/api_key)."""
+    global _sync_client
+    if _sync_client is not None:
+        return _sync_client
+    try:
+        settings = get_settings()
+        api_key = settings.effective_api_key  # type: ignore[attr-defined]
+        base_url = settings.effective_base_url  # type: ignore[attr-defined]
+        if not api_key:
+            logger.warning("Meta client sync non configuré — MODEL_API_KEY manquant")
+            return None
+        from openai import OpenAI
+
+        _sync_client = OpenAI(api_key=api_key, base_url=base_url)
+        logger.info("Meta client sync initialisé base_url=%s", base_url)
+        return _sync_client
+    except Exception as e:
+        logger.warning("Impossible d'initialiser le client Meta sync: %s", e)
+        return None
+
+
+def reset_sync_client() -> None:
+    global _sync_client
+    _sync_client = None
 
 
 def get_meta_client() -> Any | None:
