@@ -88,9 +88,7 @@ try:
             validation_alias=AliasChoices("OPENAI_MODEL", "openai_model"),
             description="Alias de SPARK_MODEL — même inference API",
         )
-        openai_timeout_s: float = Field(
-            default=20.0, description="Alias de SPARK_TIMEOUT_S"
-        )
+        openai_timeout_s: float = Field(default=20.0, description="Alias de SPARK_TIMEOUT_S")
 
         # ── Ingestion vidéo ──
         ingestion_max_queue_size: int = Field(default=100)
