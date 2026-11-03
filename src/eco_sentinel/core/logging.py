@@ -39,7 +39,7 @@ def get_logger(name: str = "eco_sentinel") -> logging.Logger:
             from eco_sentinel.config import get_settings
 
             level_name = get_settings().log_level
-        except Exception:
+        except Exception:  # nosec B110  # noqa: S110
             pass
         logger.setLevel(getattr(logging, level_name.upper(), logging.INFO))
         logger.propagate = False

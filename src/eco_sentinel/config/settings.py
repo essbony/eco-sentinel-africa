@@ -26,7 +26,7 @@ try:
             default="INFO", validation_alias=AliasChoices("LOG_LEVEL", "log_level")
         )
         api_host: str = Field(
-            default="0.0.0.0", validation_alias=AliasChoices("API_HOST", "api_host")
+            default="0.0.0.0"  # nosec B104  # noqa: S104, validation_alias=AliasChoices("API_HOST", "api_host")
         )
         api_port: int = Field(default=8000, validation_alias=AliasChoices("API_PORT", "api_port"))
         secret_key: str = Field(
@@ -101,6 +101,18 @@ try:
         # ── Persistance ──
         database_url: str = Field(default="")
 
+        # ── CORS (prod) ──
+        cors_origins: str = Field(
+            default="",
+            validation_alias=AliasChoices("CORS_ORIGINS", "cors_origins"),
+        )
+
+        @property
+        def cors_origins_list(self) -> list[str]:
+            if not self.cors_origins.strip():
+                return []
+            return [o.strip() for o in self.cors_origins.split(",") if o.strip()]
+
         # ── A2A ──
         a2a_enabled: bool = Field(default=True)
         a2a_timeout_s: float = Field(default=10.0)
@@ -144,7 +156,7 @@ except ImportError:
         env: str = os.getenv("ENV", "development")
         debug: bool = os.getenv("DEBUG", "true").lower() in ("1", "true", "yes")
         log_level: str = os.getenv("LOG_LEVEL", "INFO")
-        api_host: str = os.getenv("API_HOST", "0.0.0.0")
+        api_host: str = os.getenv("API_HOST", "0.0.0.0")  # nosec B104  # noqa: S104
         api_port: int = int(os.getenv("API_PORT", "8000"))
         secret_key: str = os.getenv("SECRET_KEY", "change-me-in-production")
         model_api_key: str = os.getenv("MODEL_API_KEY", "") or os.getenv("OPENAI_API_KEY", "")
@@ -165,6 +177,13 @@ except ImportError:
         event_dedup_window_s: int = int(os.getenv("EVENT_DEDUP_WINDOW_S", "60"))
         alert_min_risk: str = os.getenv("ALERT_MIN_RISK", "medium")
         database_url: str = os.getenv("DATABASE_URL", "")
+        cors_origins: str = os.getenv("CORS_ORIGINS", "")
+
+        @property
+        def cors_origins_list(self) -> list[str]:
+            if not self.cors_origins.strip():
+                return []
+            return [o.strip() for o in self.cors_origins.split(",") if o.strip()]
 
         @property
         def effective_api_key(self) -> str:

@@ -22,7 +22,7 @@ class MockVisionAdapter(VisionPort):
         await asyncio.sleep(0.01)  # latence simulée
 
         # Déterministe : hash de l'image → pseudo-détections
-        h = hashlib.md5(inp.image_bytes).hexdigest()
+        h = hashlib.md5(inp.image_bytes, usedforsecurity=False).hexdigest()
         # Si l'image contient le mot "waste" en clair, on simule une détection
         # sinon détection aléatoire basée sur hash (environ 30% de détections)
         has_waste_hint = b"waste" in inp.image_bytes.lower()

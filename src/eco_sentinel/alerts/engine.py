@@ -24,7 +24,7 @@ _recent_alerts: dict[str, float] = {}
 def _deduplication_key(event: EcoEvent, rule_id: str) -> str:
     cat = event.detection.results[0].category if event.detection.results else "unknown"
     raw = f"{event.source_id}:{cat}:{rule_id}"
-    return hashlib.md5(raw.encode()).hexdigest()[:12]
+    return hashlib.md5(raw.encode(), usedforsecurity=False).hexdigest()[:12]
 
 
 def evaluate(

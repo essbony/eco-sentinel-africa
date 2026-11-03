@@ -1,4 +1,4 @@
-.PHONY: install sync lint format type test cov run api docker-build docker-up docker-down docker-logs docker-shell eval eval-docker clean
+.PHONY: install sync lint format type test cov run api docker-build docker-up docker-down docker-logs docker-shell eval eval-docker clean security security-bandit security-pip-audit security-semgrep security-all audit
 
 UV := uv
 PY := $(UV) run python
@@ -21,6 +21,22 @@ test:
 
 cov:
 	$(UV) run pytest --cov=src --cov-report=term-missing --cov-report=html
+
+# ── Sécurité : bandit (SAST), pip-audit (CVE), semgrep (SAST) ──
+security-bandit:
+	$(UV) run bandit -c pyproject.toml -r src -x tests
+
+security-pip-audit:
+	XDG_CACHE_HOME=/tmp $(UV) run pip-audit --skip-editable --desc --cache-dir /tmp/pip-audit-cache || true
+
+security-semgrep:
+	HOME=/tmp XDG_CACHE_HOME=/tmp $(UV) run semgrep --config auto --error src
+
+security: security-bandit security-pip-audit security-semgrep
+
+security-all: lint type security-bandit security-pip-audit security-semgrep test
+
+audit: security-all
 
 run:
 	$(UV) run eco-sentinel

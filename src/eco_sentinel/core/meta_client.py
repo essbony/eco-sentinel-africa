@@ -74,7 +74,7 @@ def extract_text(resp: Any) -> str:
                 ).strip()
                 if joined:
                     return joined
-            except Exception:
+            except Exception:  # nosec B110  # noqa: S110
                 pass
     # Aucun texte exploitable → signal d'échec, ne pas fallback vers str(resp)
     return ""
@@ -218,7 +218,7 @@ async def call_meta_json(
         if start != -1 and end != -1 and end > start:
             try:
                 return json.loads(cleaned[start : end + 1])  # type: ignore[no-any-return]
-            except Exception:
+            except Exception:  # nosec B110  # noqa: S110
                 pass
         logger.warning("Réponse Meta non-JSON model=%s: %.200s", model, text)
         return fallback

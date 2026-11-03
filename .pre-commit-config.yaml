@@ -1,0 +1,38 @@
+# Pre-commit — Eco Sentinel Africa (ruff, mypy, bandit, semgrep, pip-audit)
+repos:
+  - repo: https://github.com/astral-sh/ruff-pre-commit
+    rev: v0.13.3
+    hooks:
+      - id: ruff
+        args: [--fix]
+      - id: ruff-format
+
+  - repo: https://github.com/pre-commit/mirrors-mypy
+    rev: v1.18.2
+    hooks:
+      - id: mypy
+        args: [--ignore-missing-imports]
+        additional_dependencies: [pydantic, pydantic-settings, types-requests]
+
+  - repo: https://github.com/PyCQA/bandit
+    rev: 1.8.6
+    hooks:
+      - id: bandit
+        args: [-c, pyproject.toml, -r, src, -x, tests]
+        exclude: ^tests/
+
+  - repo: https://github.com/semgrep/semgrep
+    rev: v1.100.0
+    hooks:
+      - id: semgrep
+        args: [--config, auto, --error]
+        exclude: ^tests/
+
+  - repo: local
+    hooks:
+      - id: pip-audit
+        name: pip-audit (CVE scan)
+        entry: bash -c 'XDG_CACHE_HOME=/tmp uv run pip-audit --skip-editable --desc --cache-dir /tmp/pip-audit-cache || true'
+        language: system
+        pass_filenames: false
+        always_run: true

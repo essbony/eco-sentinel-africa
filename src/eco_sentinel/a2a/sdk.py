@@ -138,7 +138,7 @@ class EcoExecutor(AgentExecutor):
                         data = json.loads(root.text)
                         if isinstance(data, dict):
                             payload.update(data)
-                    except Exception:
+                    except Exception:  # nosec B110  # noqa: S110
                         pass
 
         # Adapte au format A2ARequest interne (compat router)

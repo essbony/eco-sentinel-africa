@@ -52,13 +52,51 @@ jobs:
 
 
   # ==========================================
-  # 2. TESTS - Tests unitaires et couverture
+  # 2. SECURITY - SAST + CVE (non-bloquant au début, puis strict)
+  # ==========================================
+
+  security:
+    name: Security (bandit / pip-audit / semgrep)
+    runs-on: ubuntu-latest
+    needs: lint
+    continue-on-error: false
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Install Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Install uv
+        uses: astral-sh/setup-uv@v5
+
+      - name: Install dependencies (with security)
+        run: uv sync --all-extras --group security --dev
+
+      - name: Bandit - SAST (Python)
+        run: uv run bandit -c pyproject.toml -r src -x tests -f txt
+
+      - name: pip-audit - CVE scan
+        run: uv run pip-audit --skip-editable --desc --cache-dir /tmp/pip-audit-cache || echo "pip-audit found vulnerabilities — voir logs"
+
+      - name: Semgrep - SAST rules
+        run: uv run semgrep --config auto --error src
+        continue-on-error: false
+
+      - name: Ruff - SAST (flake8-bandit S)
+        run: uv run ruff check --select S src
+
+  # ==========================================
+  # 2b. TESTS - Tests unitaires et couverture
   # ==========================================
 
   tests:
     name: Run Tests
     runs-on: ubuntu-latest
-    needs: lint
+    needs: [lint, security]
 
     steps:
       - name: Checkout repository

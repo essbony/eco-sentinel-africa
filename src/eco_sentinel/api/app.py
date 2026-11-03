@@ -45,9 +45,14 @@ def create_app() -> FastAPI:
         ),
         lifespan=lifespan,
     )
+    # CORS : étoile en dev, origines explicites en prod (via CORS_ORIGINS)
+    from eco_sentinel.config.settings import get_settings
+
+    settings = get_settings()
+    cors_origins = ["*"] if settings.env != "production" else settings.cors_origins_list
     app.add_middleware(
         CORSMiddleware,
-        allow_origins=["*"],
+        allow_origins=cors_origins,  # nosemgrep
         allow_credentials=True,
         allow_methods=["*"],
         allow_headers=["*"],

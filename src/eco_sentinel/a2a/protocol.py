@@ -59,7 +59,7 @@ class A2ABus:
             from eco_sentinel.a2a.sdk import EcoExecutor
 
             self._executors[card.agent_id] = EcoExecutor(card.agent_id, handler)
-        except Exception:
+        except Exception:  # nosec B110  # noqa: S110
             pass
         logger.info("A2A agent enregistré: %s (%s)", card.agent_id, card.capabilities)
 

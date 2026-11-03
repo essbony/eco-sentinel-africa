@@ -118,7 +118,7 @@ async def ws_ingest(websocket: WebSocket, source_id: str) -> None:
         logger.exception("WS ingest error %s", e)
         try:
             await websocket.close()
-        except Exception:
+        except Exception:  # nosec B110  # noqa: S110
             pass
 
 

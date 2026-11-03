@@ -50,3 +50,11 @@ logs/
 .deepeval/
 evals/results/
 evals/.deepeval/
+
+# Sécurité
+.bandit/
+bandit.json
+bandit.html
+pip-audit.json
+.semgrep/
+semgrep.json
