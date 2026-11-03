@@ -23,10 +23,10 @@ cov:
 	$(UV) run pytest --cov=src --cov-report=term-missing --cov-report=html
 
 run:
-	$(UV) run meta-ai-dev
+	$(UV) run eco-sentinel
 
 api:
-	$(UV) run uvicorn meta_ai_dev.api.app:app --reload --host 0.0.0.0 --port 8000
+	$(UV) run uvicorn eco_sentinel.api.app:app --reload --host 0.0.0.0 --port 8000
 
 docker-build:
 	docker compose build

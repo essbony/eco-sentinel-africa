@@ -1,5 +1,5 @@
-"""Core — logique métier transverse."""
+"""Compat shim — ré-exporte eco_sentinel.core."""
 
-from meta_ai_dev.core.logging import get_logger
+from eco_sentinel.core.logging import get_logger
 
 __all__ = ["get_logger"]

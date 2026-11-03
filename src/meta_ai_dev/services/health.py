@@ -1,10 +1,5 @@
-"""Service de health-check."""
+"""Compat shim — ré-exporte eco_sentinel.services.health."""
 
-from meta_ai_dev.config.settings import get_settings
-from meta_ai_dev.models.health import HealthResponse
+from eco_sentinel.services.health import HealthService
 
-
-class HealthService:
-    def check(self) -> HealthResponse:
-        settings = get_settings()
-        return HealthResponse(app=settings.app_name)
+__all__ = ["HealthService"]

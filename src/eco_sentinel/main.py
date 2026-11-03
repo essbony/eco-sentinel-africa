@@ -1,6 +1,6 @@
 """Entrypoint Eco Sentinel Africa."""
 
-from meta_ai_dev.config.settings import get_settings
+from eco_sentinel.config.settings import get_settings
 
 
 def main() -> None:

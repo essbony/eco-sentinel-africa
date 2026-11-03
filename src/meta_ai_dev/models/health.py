@@ -1,13 +1,13 @@
-"""Modèles de santé / statut — fonctionne avec ou sans pydantic."""
+"""Compat shim — modèle HealthResponse (conservé pour compatibilité tests)."""
 
 from datetime import UTC, datetime
 
 try:
     from pydantic import BaseModel, Field
 
-    class HealthResponse(BaseModel):
+    class HealthResponse(BaseModel):  # type: ignore[no-redef]
         status: str = Field(default="ok")
-        app: str = Field(default="meta-ai-dev")
+        app: str = Field(default="eco-sentinel-africa")
         version: str = Field(default="0.1.0")
         timestamp: datetime = Field(default_factory=lambda: datetime.now(UTC))
 
@@ -17,6 +17,6 @@ except ImportError:
     @dataclass
     class HealthResponse:  # type: ignore[no-redef]
         status: str = "ok"
-        app: str = "meta-ai-dev"
+        app: str = "eco-sentinel-africa"
         version: str = "0.1.0"
         timestamp: datetime = field(default_factory=lambda: datetime.now(UTC))

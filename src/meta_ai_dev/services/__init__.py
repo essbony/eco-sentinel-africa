@@ -1,5 +1,5 @@
-"""Services — logique métier."""
+"""Compat shim — ré-exporte eco_sentinel.services."""
 
-from meta_ai_dev.services.health import HealthService
+from eco_sentinel.services.health import HealthService
 
 __all__ = ["HealthService"]

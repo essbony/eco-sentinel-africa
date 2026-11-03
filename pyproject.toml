@@ -26,9 +26,10 @@ dependencies = [
 ]
 
 [project.scripts]
-meta-ai-dev = "meta_ai_dev:main"
 eco-sentinel = "eco_sentinel.main:main"
 eco-sentinel-africa = "eco_sentinel.main:main"
+# Compat — alias historique
+meta-ai-dev = "eco_sentinel.main:main"
 
 [project.optional-dependencies]
 dev = [

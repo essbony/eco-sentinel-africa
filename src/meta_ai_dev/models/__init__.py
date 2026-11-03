@@ -1,5 +1,5 @@
-"""Models — schémas Pydantic / ORM."""
+"""Compat shim — ré-exporte eco_sentinel."""
 
-from meta_ai_dev.models.health import HealthResponse
+from eco_sentinel.models.events import *  # noqa: F401,F403
 
-__all__ = ["HealthResponse"]
+__all__ = []  # type: ignore[assignment]

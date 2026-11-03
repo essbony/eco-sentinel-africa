@@ -1,6 +1,6 @@
-# Exemple de config par environnement
+# Exemple de config Eco Sentinel Africa
 app:
-  name: meta-ai-dev
+  name: eco-sentinel-africa
   env: development
 
 api:
@@ -9,3 +9,15 @@ api:
 
 logging:
   level: INFO
+
+vision:
+  provider: meta
+  model: sam-3.1
+
+router:
+  provider: meta
+  model: muse-wonder-1.0
+
+agents:
+  provider: meta
+  model: muse-spark-1.3

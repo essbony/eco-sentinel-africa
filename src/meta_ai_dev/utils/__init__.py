@@ -1,5 +1,5 @@
-"""Utils — helpers purs."""
+"""Compat shim — ré-exporte eco_sentinel.utils."""
 
-from meta_ai_dev.utils.helpers import slugify
+from eco_sentinel.utils.helpers import slugify
 
 __all__ = ["slugify"]

@@ -1,8 +1,8 @@
-"""API layer."""
+"""Compat shim."""
 
 try:
-    from meta_ai_dev.api.app import app
+    from eco_sentinel.api.app import app, create_app
 
-    __all__ = ["app"]  # type: ignore[no-redef]
+    __all__ = ["app", "create_app"]
 except ImportError:
-    __all__ = []  # type: ignore[no-redef,assignment]
+    __all__ = []  # type: ignore[assignment]

@@ -1,13 +1,5 @@
-"""Exceptions métier."""
+"""Compat shim — ré-exporte eco_sentinel.core.exceptions."""
 
+from eco_sentinel.core.exceptions import AppError, NotFoundError, ValidationError
 
-class AppError(Exception):
-    """Erreur applicative de base."""
-
-
-class NotFoundError(AppError):
-    """Ressource introuvable."""
-
-
-class ValidationError(AppError):
-    """Données invalides."""
+__all__ = ["AppError", "NotFoundError", "ValidationError"]

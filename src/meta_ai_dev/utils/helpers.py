@@ -1,10 +1,5 @@
-"""Helpers génériques."""
+"""Compat shim — ré-exporte eco_sentinel.utils.helpers."""
 
-import re
+from eco_sentinel.utils.helpers import slugify
 
-
-def slugify(value: str) -> str:
-    value = value.lower().strip()
-    value = re.sub(r"[^\w\s-]", "", value)
-    value = re.sub(r"[\s_-]+", "-", value)
-    return value.strip("-")
+__all__ = ["slugify"]

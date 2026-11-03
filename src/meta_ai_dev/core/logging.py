@@ -1,16 +1,5 @@
-"""Logging structuré entreprise."""
+"""Compat shim — ré-exporte eco_sentinel.core.logging."""
 
-import logging
-import sys
+from eco_sentinel.core.logging import get_logger
 
-
-def get_logger(name: str = "meta_ai_dev") -> logging.Logger:
-    logger = logging.getLogger(name)
-    if not logger.handlers:
-        handler = logging.StreamHandler(sys.stdout)
-        fmt = "%(asctime)s | %(levelname)s | %(name)s | %(message)s"
-        handler.setFormatter(logging.Formatter(fmt))
-        logger.addHandler(handler)
-        logger.setLevel(logging.INFO)
-        logger.propagate = False
-    return logger
+__all__ = ["get_logger"]
